@@ -10,6 +10,12 @@ class Cudatel_model extends Alvin_Model {
     {
         parent::__construct();
     }
+
+    public function makeCudatelUrl($segments)
+    {
+        $connectors = ['gui', 'cdr', 'websocket', 'login'];
+
+    }
     /*
      *
      * __auth_user:5041
