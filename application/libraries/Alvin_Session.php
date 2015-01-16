@@ -6,18 +6,49 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  *
  */
 class Alvin_Session extends CI_Session {
-    
-    /**
-     * @var Object - CodeIgniter Instance ( Used only for parentLoadModel() )
-     */
-    protected $parent;
+
+    public $user;
+    public $cuda;
 
     function __construct()
     {
         parent::__construct();
-        $this->parent =& get_instance();
-        $this->parent->load->parentModel('user_model', '', true);
-        $this->parent->load->parentModel('cudatel_model', '', true);
+        $this->_ci =& get_instance();
+        $this->_ci->load->library('cudatel');
+    }
+
+    public function setUser($user)
+    {
+        $this->user = $user;
+        $this->setCuda();
+
+        return $this->user;
+    }
+
+    public function setCuda()
+    {
+        $valid = $this->_ci->cudatel->session('create', $creds);
+
+        if($user->valid)
+        {
+            $this->setCuda($user);
+            $this->user = $user;
+        }
+
+        return $this->user;
+    }
+
+    /**
+     * Create a new session for a valid CudaTel user
+     *
+     * @return array
+     */
+    function create()
+    {
+        $user = $this->getUser();
+        $this->_ci->cudatel->session('create', $user);
+
+        return $creds;
     }
 
     /**
@@ -27,38 +58,29 @@ class Alvin_Session extends CI_Session {
      *
      * @return array
      */
-    function revive($user, $pass)
+    function refresh($user, $pass)
     {
-        $user = $this->parent->user_model->validate($user, $pass);
+        $this->_ci->cudatel->session('refresh');
+        $user = $this->_ci->user_model->validate($user, $pass);
+
 
         return $user;
     }
 
     /**
-     * Destroy the user's Alvin session
+     * Destroy the user's sessions
      * @return bool
      */
-    function murder()
+    function destroy()
     {
-        $this->set_userdata([]);
+        $this->_ci->cudatel->session('destroy');
         $this->sess_destroy();
-        $token = $this->userdata('auth_token');
 
-        return (!isset($token));
+
+        return ( ! isset($this->userdata['session_id']));
     }
 
-    /**
-     * Create a new session for a valid CudaTel user
-     * @param $user - Alvin User Object
-     *
-     * @return array
-     */
-    function linkup($user)
-    {
-        $creds = $this->parent->cudatel_model->validate($user);
 
-        return $creds;
-    }
 
     /**
      * Destroy the user's CudaTel session
@@ -67,7 +89,7 @@ class Alvin_Session extends CI_Session {
      */
     function unlink()
     {
-        //TODO
+
         return true;
     }
 
@@ -76,11 +98,41 @@ class Alvin_Session extends CI_Session {
      */
     function status()
     {
-        $token = ['auth_token' => $this->userdata('auth_token')];
-        $user = $this->parent->user_model->findToken($token);
+        $user = $this->user();
+        $cuda = $this->cuda($user);
 
-        return $this->parent->cudatel_model->validate($user);
+        return $this->_ci->cudatel_model->validate($user);
     }
+
+    public function checkAndRedirect($to = 'home')
+    {
+        if($this->user->valid)
+        {
+            redirect($to);
+        }
+
+        redirect('auth');
+    }
+
+    public function redirectInValid()
+    {
+        if( ! $this->user->valid)
+        {
+
+        }
+
+        return false;
+    }
+
+    public function messageInvalid($message, $valid = false)
+    {
+        $this->sess_destroy();
+        $this->flashdata(compact('message'));
+
+        return (object) compact('valid');
+    }
+
+
 }
     
     

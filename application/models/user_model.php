@@ -6,32 +6,52 @@ class User_model extends Alvin_Model {
     function __construct()
     {
         parent::__construct();
+        $this->_ci =& get_instance();
+        $this->_ci->load->library('session');
         $this->table = 'users';
     }
 
-    public function validate($username, $password)
+    public function authenticate($auth_usern, $auth_passw)
     {
-        $user = ['username' => $username, 'password' => $this->hash($password)];
+        $user = compact('auth_usern', 'auth_passw');
 
         if($this->exists($user))
         {
             $user = $this->pull($user, 1);
-            $user->auth_token = $this->newToken();
-            $this->push($user);
-            $user->valid = true;
+            $user = $this->authorize($user);
             return $user;
         }
 
-        return (object) ['valid' => false, 'message' => 'Invalid Username and/or Password.'];
+        $this->attempts($auth_usern, '+');
+
+        return $this->_ci->session->messageInvalid('Invalid Username and/or Password.');
     }
 
-    public function findToken($token)
+    private function authorize($user)
     {
-        if($this->exists($token))
+        $blocked = $user->auth_block == 1 ? true : false;
+        if( ! $blocked)
         {
-            return $this->pull($token);
+            $user->valid = true;
+            $this->_ci->session->setUser($user);
+            $this-> attempts($user->auth_usern, '-');
+            return $user;
         }
 
-        return (object) ['valid' => false, 'message' => 'Session expired. Please log back in.'];
+        return $this->_ci->session->messageInvalid('Account Blocked (Too many failed attempts)');
+    }
+
+    private function attempts($auth_usern, $action)
+    {
+        $user = compact('auth_usern');
+        if($this->exists($user))
+        {
+            $user = $this->pull($user, 1);
+            $user->auth_atmpt = $action == '+' ? $user->auth_atmpt+1 : 0;
+            $user->auth_block = $user->auth_atmpt >= 10 ? 1 : 0;
+            $this->push($user);
+        }
+
+        return;
     }
 }

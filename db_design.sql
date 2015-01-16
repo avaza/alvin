@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `auth_usern` varchar(75) NOT NULL,
   `auth_passw` varchar(40) NOT NULL,
-  `auth_token` varchar(40) DEFAULT NULL,
   `auth_creds` varchar(255) DEFAULT NULL,
   `auth_level` int(1) unsigned NOT NULL DEFAULT '1',
   `auth_atmpt` int(1) unsigned NOT NULL DEFAULT '0',

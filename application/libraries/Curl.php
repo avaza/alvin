@@ -1,16 +1,27 @@
 <?php 
 class Curl {
 
+    /**
+     * @var
+     */
     protected $handler;
-    protected $options;
+    /**
+     * @var array
+     */
+    protected $curlOpt;
+    /**
+     * @var
+     */
     protected $request;
 
+    /**
+     *
+     */
     public function __construct()
     {
-        $this->options = [
+        $this->$curlOpt = [
             'server' => 'cudatel',
-               'url' => null,
-              'post' => null,
+            'type' => 'GET',
             'cookie' => [
                 'storage' => '/opt/alvin/cache/',
                 'filename' => "",
@@ -26,68 +37,120 @@ class Curl {
                 'userAgent' => 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:10.0.2) Gecko/20100101 Firefox/10.0.2'
             ]
         ];
+    }
+
+    /**
+     * @param null  $url
+     * @param array $params
+     * @param array $options
+     * @return mixed
+     */
+    public function fetch( $url = null, $params = [], $options = [] )
+    {
+        $this->curlOpt = array_merge($this->curlOpt, $options);
+
+        $this->request = [
+            'url' => $url,
+            'params' => $params
+        ];
+
+        if(isset($this->request['url']))
+        {
+            return $this->executeCurl();
+        }
+
+        die('You must include a URL');
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function executeCurl()
+    {
+        $this->createRequest();
+        $this->createHandler();
+
+        return $this->executeHandle();
+    }
+
+    /**
+     * @return $this
+     */
+    function createRequest()
+    {
+        $this->request['url'] = $this->buildUrl();
+        $this->request['query'] = $this->buildQuery();
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    function createHandler()
+    {
+        $this->handler =  curl_init();
+
+        if( $this->curlOpt['type'] == 'POST' ){
+            curl_setopt( $this->handler, CURLOPT_POST, true );
+            curl_setopt( $this->handler, CURLOPT_POSTFIELDS, $this->request['query'] );
+        }
+
+        $cookieFile = $this->curlOpt['cookie']['storage'] . $this->curlOpt['cookie']['filename'];
+        curl_setopt( $this->handler, CURLOPT_URL, $this->request['url'] );
+        curl_setopt( $this->handler, CURLOPT_USERAGENT, $this->curlOpt['request']['userAgent'] );
+        curl_setopt( $this->handler, CURLOPT_COOKIEJAR,  $cookieFile );
+        curl_setopt( $this->handler, CURLOPT_COOKIEFILE, $cookieFile );
+        curl_setopt( $this->handler, CURLOPT_AUTOREFERER, $this->curlOpt['request']['autoReferrer'] );
+        curl_setopt( $this->handler, CURLOPT_COOKIESESSION, $this->curlOpt['cookie']['session'] );
+        curl_setopt( $this->handler, CURLOPT_RETURNTRANSFER, $this->curlOpt['request']['returnTransfer'] );
+        curl_setopt( $this->handler, CURLOPT_FOLLOWLOCATION, $this->curlOpt['request']['followLocation'] );
+        curl_setopt( $this->handler, CURLOPT_CONNECTTIMEOUT, $this->curlOpt['request']['userAgent'] );
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function executeHandle()
+    {
+        $result = curl_exec( $this->handler );
+        curl_close( $this->handler );
         $this->request = [
             'url' => null,
             'params' => []
         ];
 
-    }
-
-    public function fetch( $curlArray = [] )
-    {
-        $requestArray = array_merge($this->request, $curlArray);
-        $request = $this->createRequest($requestArray);
-        $this->handler = $this->curlHandle($request);
-    }
-
-    function createRequest($requestArray)
-    {
-        if( ! isset($requestArray['url'])) die('You must include a URL with your request');
-        if( isset($requestArray['params']) && is_array($requestArray['params']))
-        {
-            $request['']$query_string = http_build_query($params, NULL, '&');
-        }
-
-
-
-
-        if($this->isDynamic($url))
-        {
-            //TODO
-            if( isset($params['post']) )         curl_setopt( $ch, CURLOPT_POSTFIELDS, $params['post'] );
-            if( isset($params['refer']) )        curl_setopt( $ch, CURLOPT_REFERER, $params['refer'] );
-        }
-
-        return $url;
-
-    }
-
-    function curlHandle($request)
-    {
-        $options = array_merge($this->options, $request);
-        $this->handler =  curl_init();
-
-        curl_setopt( $ch, CURLOPT_URL, $options['url'] );
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-        curl_setopt( $ch, CURLOPT_AUTOREFERER, true );
-        curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, true );
-        curl_setopt( $ch, CURLOPT_POST, isset($request['post']) );
-
-        if( isset($request['post']) )         curl_setopt( $ch, CURLOPT_POSTFIELDS, $request['post'] );
-        if( isset($request['refer']) )        curl_setopt( $ch, CURLOPT_REFERER, $request['refer'] );
-
-        curl_setopt( $ch, CURLOPT_USERAGENT, $useragent );
-        curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, ( isset($request['timeout']) ? $request['timeout'] : 5 ) );
-        curl_setopt( $ch, CURLOPT_COOKIESESSION, true );
-        curl_setopt( $ch, CURLOPT_COOKIEJAR,  $request['cookiefile'] );
-        curl_setopt( $ch, CURLOPT_COOKIEFILE, $request['cookiefile'] );
-
-        $result = curl_exec( $ch );
-        curl_close( $ch );
         return $result;
     }
 
-    protected function isDynamic($url)
+    /**
+     * @return string
+     */
+    protected function buildUrl()
+    {
+        $url = $this->request['url'];
+
+        if($this->isNotQualified($url))
+        {
+            $server = $this->getServerUrl($this->curlOpt['server']);
+            $url = substr($server, -1) == '/' ? $server . $url : $server . '/' . $url;
+        }
+
+        if($this->curlOpt['type'] == 'GET')
+        {
+            $url .= "?" . $this->buildQuery();
+        }
+
+        return $url;
+    }
+
+    /**
+     * @param $url
+     * @return bool
+     */
+    protected function isNotQualified($url)
     {
         if(substr($url, 0, 6) != 'http://')
         {
@@ -97,16 +160,30 @@ class Curl {
         return true;
     }
 
+    /**
+     * @param $server
+     * @return mixed
+     */
     protected function getServerUrl($server)
     {
-        switch($server)
+        $urls = [
+            'alvin' => 'http://' . $_SERVER['HTTP_HOST'],
+            'cudatel' => 'http://192.168.1.254'
+        ];
+
+        return $urls[$server];
+    }
+
+    /**
+     * @return string
+     */
+    protected function buildQuery()
+    {
+        if( is_array($this->request['params']) && !empty($this->request['params']))
         {
-            case 'alvin':
-                return 'http://' . $_SERVER['HTTP_HOST'];
-                break;
-            case 'cudatel':
-                return 'http://192.168.1.254';
-                break;
+            return http_build_query($this->request['params'], NULL, '&');
         }
+
+        return "";
     }
 }

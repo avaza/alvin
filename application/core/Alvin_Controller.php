@@ -1,69 +1,52 @@
 <?php
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+/**
+ * Class Alvin_Controller
+ *
+ * @property Alvin_Session $session
+ */
 class Alvin_Controller extends CI_Controller {
 	
-    /**
-     * @var $controller_vars
-     */
-    private $controller_vars;
+    protected $message;
+    protected $details;
+    protected $content;
 
-    /**
-     * Load AuthModel and check if requester has been authenticated
-     */
     function __construct()
     {
         parent::__construct();
-        $this->load->model('auth_model', '', true);
-        $this->authenticated();
+        $this->session->checkAndRedirect();
+        $this->message = $this->session->flashdata('message');
     }
 
-    /**
-     * Checks if requester has been authenticated
-     *
-     * @return redirect
-     */
-    private function authenticated()
+    public function form($action)
     {
-        if(!$this->auth_model->authenticated())
-        {
-            redirect('auth');
-        }
+
     }
 
-    /**
-         * Sets or Un-sets Controller vars by ENVIRONMENT
-         * @param string variable name
-         * @param mixed variable value
-         *
-         * @return void
-         */
-        protected function set_env($var, $value = null)
+
+    protected function create()
         {
-            $this->controller_vars = ['tes' => [],'dev' => [],'pro' => []];
-            $env = substr(ENVIRONMENT, 1, 2);
-
-            if(isset($value))
-            {
-                $this->controller_vars[$env][$var] = $value;
-            }
-
-            if(is_null($value))
-            {
-                unset($this->controller_vars[$env][$var]);
-            }
+            //TODO should take the form array (from model) and create all form fields for it empty and ready to add a new record
+            //TODO should include classes, messages, and load the standard form view "form"
+            //TODO $details will include the default values
+            //TODO $messages will include validation errors
         }
 
-        /**
-         * Retrieve controller ENVIRONMENT based variable values
-         * @param string $var variable name
-         *
-         * @return mixed
-         */
-        public function get_env($var)
-        {
-            $env = substr(ENVIRONMENT, 1, 2);
-
-            return isset($this->controller_vars[$env][$var]) ? $this->controller_vars[$env][$var] : null;
+    protected function update()
+    {
+        if($this->input->post('whatever')){
+            $this->formValidate();
         }
+        //TODO should take the form array (from model) and create all form fields for it complete with current values
+        //TODO should include classes, messages, and load the standard form view "form"
+        //TODO $details will include the current values
+        //TODO $messages will include validation errors
+    }
+
+    protected function formValidate()
+    {
+        //TODO should run the model's validate function and return any messages back to the view OR redirect to success page
+    }
+
 }

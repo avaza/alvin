@@ -1,34 +1,36 @@
 <?php 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+/**
+ * Class Auth
+ *
+ * @property Alvin_Session $session
+ */
 class Auth extends CI_Controller {
+
+    protected $message;
+    protected $details;
+    protected $content;
 
     function __construct()
     {
         parent::__construct();
-        $this->load->model('auth_model');
+        $this->load->model('validation_model');
+        $this->message = $this->session->flashdata('message');
     }
 
     /**
      * Site-wide entry point (All unauthenticated requests point here)
-     * @param string $message - Auth message for view display
      *
      * @return void
      */
-    public function index($message = null)
+    public function index()
     {
-        if($this->auth_model->authenticated())
-        {
-            redirect('home');
-        }
+        $this->content = 'auth';
 
-        $data['message'] = $message;
-        $data['main_content'] = 'auth';
-        $this->load->view('auth', $data);
-    }
+        $this->session->checkAndRedirect();
 
-    function create_first_user()
-    {
+        $this->load->view('gui', $this->data());
     }
 
     /**
@@ -38,8 +40,9 @@ class Auth extends CI_Controller {
      */
     public function creds()
     {
-        header('Content-Type: application/x-json; charset=utf-8');
-        echo(json_encode($this->auth_model->authenticated()));
+        $this->details = $this->session->user;
+
+        $this->load->view('api', $this->data());
     }
 
     /**
@@ -50,11 +53,22 @@ class Auth extends CI_Controller {
      */
     public function set()
     {
-        $auth = $this->auth_model->authenticate();
-        if($auth->valid){
-            redirect('home');
+        $this->validation_model->authenticate();
+
+        $this->index();
+    }
+
+    protected function data()
+    {
+        $data = [];
+        $vars = [ 'content', 'details', 'message' ];
+
+        foreach($vars as $var)
+        {
+            if( isset($this->$var) ) $data[$var] = $this->$var;
         }
 
-        $this->index($auth->message);
+        return $data;
     }
+
 }

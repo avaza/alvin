@@ -11,12 +11,9 @@ class Alvin_Model extends CI_Model {
      */
     private $crypt;
 
-    /**
-     * @var Object CI instance
-     */
-    protected $parent;
-
     protected $table;
+
+    protected $form;
 
     function __construct()
     {
@@ -33,16 +30,6 @@ class Alvin_Model extends CI_Model {
     protected function hash($string)
     {
         return sha1($string . $this->crypt);
-    }
-
-    /**
-     * Generate a unique token
-     *
-     * @return bool
-     */
-    protected function newToken()
-    {
-        return $this->hash( strtotime('now') . $this->crypt );
     }
 
     /**
