@@ -19,7 +19,7 @@ class Curl {
      */
     public function __construct()
     {
-        $this->$curlOpt = [
+        $this->curlOpt = [
             'server' => 'cudatel',
             'type' => 'GET',
             'cookie' => [

@@ -8,67 +8,56 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  */
 class Auth extends CI_Controller {
 
-    protected $message;
     protected $details;
-    protected $content;
 
     function __construct()
     {
         parent::__construct();
-        $this->load->model('validation_model');
-        $this->message = $this->session->flashdata('message');
+        $this->details['message'] = $this->session->flashdata('message');
     }
 
     /**
-     * Site-wide entry point (All unauthenticated requests point here)
+     * Site-wide entry point (All unauthenticated requests are redirected here)
      *
      * @return void
      */
     public function index()
     {
-        $this->content = 'auth';
+        $this->load->view('gui', 'login');
+    }
+
+    /**
+     * @return void
+     */
+    public function login()
+    {
+        $this->load->library('form_validation');
+        $this->form_validation->run();
 
         $this->session->checkAndRedirect();
-
-        $this->load->view('gui', $this->data());
     }
 
     /**
-     * Retrieve session credentials and display as JSON string
-     *
      * @return void
      */
-    public function creds()
+    public function logout()
     {
-        $this->details = $this->session->user;
+        $this->session->destroy();
+        $this->session->set_flashdata('message', 'Successfully Logged Out');
 
-        $this->load->view('api', $this->data());
+        $this->session->checkAndRedirect();
     }
 
     /**
-     * Login : if POST [username, password]
-     * Logout: if no POST values
-     *
-     * @return void
+     * @return boolean
      */
-    public function set()
+    public function authenticate()
     {
-        $this->validation_model->authenticate();
+        $this->load->model('user_model');
+        $user = $this->user_model->authenticate($this->input->post('email'), $this->input->post('password'));
 
-        $this->index();
+        $this->session->set_flashdata('message', $user->message);
+
+        return $user->valid;
     }
-
-    protected function data()
-    {
-        $data = [];
-        $vars = [ 'content', 'details', 'message' ];
-
-        foreach($vars as $var)
-        {
-            if( isset($this->$var) ) $data[$var] = $this->$var;
-        }
-
-        return $data;
-    }
-
 }

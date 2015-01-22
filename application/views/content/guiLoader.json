@@ -1,0 +1,10 @@
+{
+    "login": {
+        "details":{
+            "pageContent": "auth/login",
+            "headerTitle": "ARC System Login",
+            "styleSheets": [ "libraries/animate.css", "libraries/flip_form.css", "content/auth.css" ],
+            "javaScripts": [ "content/auth.js" ]
+        }
+    }
+}

@@ -9,6 +9,18 @@ class Users extends Alvin_Controller {
     }
 
     /**
+     * Retrieve session credentials and display as JSON string
+     *
+     * @return void
+     */
+    public function creds()
+    {
+        $this->details = $this->session->user;
+
+        $this->load->view('api', $this->data());
+    }
+
+    /**
      * Load primary Users View
      *
      * @param null $message
@@ -127,6 +139,16 @@ class Users extends Alvin_Controller {
         $this->load->model('user_m','', TRUE);    
         header('Content-Type: application/x-json; charset=utf-8');
         echo(json_encode($this->user_m->check_if_extension_exists($extension)));
+    }
+
+    protected function matchContact()
+    {
+
+    }
+
+    protected function checkResetToken()
+    {
+
     }
 
 }

@@ -1,6 +1,6 @@
 <?php
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
+//TODO auth_email
 class User_model extends Alvin_Model {
 
     function __construct()
@@ -11,9 +11,10 @@ class User_model extends Alvin_Model {
         $this->table = 'users';
     }
 
-    public function authenticate($auth_usern, $auth_passw)
+    public function authenticate($auth_email, $auth_passw)
     {
-        $user = compact('auth_usern', 'auth_passw');
+        $auth_passw = $this->hash($auth_passw);
+        $user = compact('auth_email', 'auth_passw');
 
         if($this->exists($user))
         {
@@ -22,7 +23,7 @@ class User_model extends Alvin_Model {
             return $user;
         }
 
-        $this->attempts($auth_usern, '+');
+        $this->attempts($auth_email, '+');
 
         return $this->_ci->session->messageInvalid('Invalid Username and/or Password.');
     }

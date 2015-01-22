@@ -1,0 +1,49 @@
+.container .flip-deck{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    -webkit-perspective: 100%;
+    perspective: 100%;
+}
+
+#flip-form {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    transition: -webkit-transform 1s;
+    transition: transform 1s;
+}
+
+#flip-form .flipper{
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+#flip-form .front {
+    display: block;
+}
+
+#flip-form .back {
+    display: none;
+    -webkit-transform: rotateY( 180deg );
+    transform: rotateY( 180deg );
+}
+
+#flip-form.flipped {
+    -webkit-transform: rotateY( -180deg );
+    transform: rotateY( -180deg );
+}
+
+#flip-form.flipped .front{
+    display: none;
+}
+
+#flip-form.flipped .back{
+    display: block;
+}

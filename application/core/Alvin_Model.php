@@ -11,6 +11,8 @@ class Alvin_Model extends CI_Model {
      */
     private $crypt;
 
+    protected $_ci;
+
     protected $table;
 
     protected $form;
@@ -18,7 +20,9 @@ class Alvin_Model extends CI_Model {
     function __construct()
     {
         parent::__construct();
+        $this->_ci =& get_instance();
         $this->crypt = $this->config->item('encryption_key');
+
     }
 
     /**
@@ -48,20 +52,20 @@ class Alvin_Model extends CI_Model {
      *
      * @return mixed
      */
-    protected function push($params)
+    public function push($params)
     {
         switch($this->exists($params))
         {
             case true:
                 if($this->update($params))
                 {
-                    return $params;
+                    return (object) $params;
                 }
                 break;
             case false:
                 if($this->create($params))
                 {
-                    return $params;
+                    return (object) $params;
                 }
                 break;
         }
@@ -76,7 +80,7 @@ class Alvin_Model extends CI_Model {
      *
      * @return mixed
      */
-    protected function pull($params = null, $max = 0)
+    public function pull($params = null, $max = 0)
     {
         $max = $max > 0 ? $max : null;
         foreach($params as $column => $value)
@@ -99,7 +103,7 @@ class Alvin_Model extends CI_Model {
      *
      * @return boolean
      */
-    protected function wipe($params = null)
+    public function wipe($params = null)
     {
         if($this->exists($params))
         {
@@ -120,7 +124,7 @@ class Alvin_Model extends CI_Model {
      *
      * @return boolean
      */
-    protected function exists($params)
+    public function exists($params)
     {
         $query = $this->pull($params);
         if($query)
@@ -182,6 +186,11 @@ class Alvin_Model extends CI_Model {
             return $result['0'];
         }
         return $result;
+    }
+
+    protected function validate($formData)
+    {
+        return $this->_ci->validator->execute($this->table, $formData);
     }
 }
     
