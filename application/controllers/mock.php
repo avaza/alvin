@@ -9,14 +9,14 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  * @author Josh Murray
  */
 
-class Mock extends Alvin_Controller{
+class Mock extends CI_Controller{
 
     function __construct()
     {
         parent::__construct();
     }
 
-    function auth(){
-
+    function index(){
+        $this->load->view('gui', 'mock');
     }
 }

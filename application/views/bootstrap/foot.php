@@ -1,9 +1,12 @@
 <?php // Basic Boilerplate Footer for Alvin Views ?>
 
+
+        <!-- =================================== FOOT ================================== -->
+
         <footer class="container">
-            <p id="footer-text"><small>Copyright &copy; <a href="http://www.avaza.co/">AVAZA L.S.C.</a> 2015</small></p>
+                <p id="footer-text"><small>Copyright &copy; <a href="http://www.avaza.co/">AVAZA L.S.C.</a> 2015</small></p>
         </footer>
-    </div> <!-- /container -->
+    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="/assets/javascripts/vendors/jquery-1.11.1.min.js"><\/script>')</script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
@@ -12,7 +15,7 @@
     <?php
     if( isset($javaScripts) && !empty($javaScripts)):
         foreach( $javaScripts as $script ):
-            echo '<script src="/assets/javascripts/' . $script . '"></script>';
+            echo "<script src=\"/assets/javascripts/{$script}\"></script>\n";
         endforeach;
     endif;
     ?>

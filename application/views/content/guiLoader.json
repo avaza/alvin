@@ -6,5 +6,13 @@
             "styleSheets": [ "libraries/animate.css", "libraries/flip_form.css", "content/auth.css" ],
             "javaScripts": [ "content/auth.js" ]
         }
-    }
+    },
+    "mock": {
+            "details":{
+                "pageContent": "mock",
+                "headerTitle": "ARC System Sandbox",
+                "styleSheets": [ "content/mock.css" ],
+                "javaScripts": [ "content/mock.js" ]
+            }
+        }
 }
