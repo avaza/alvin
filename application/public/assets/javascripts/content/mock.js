@@ -3,8 +3,10 @@
  */
 $(document).ready(function(){
 
+    $('input, textarea').placeholder();
+
     $('.flip-click').bind("click", function(){
-        $('#deck').toggleClass('flipped');
+        $('.flip-container').toggleClass('flipped');
     });
 
 });

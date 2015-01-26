@@ -35,16 +35,16 @@ class User_model extends Alvin_Model {
         {
             $user->valid = true;
             $this->_ci->session->setUser($user);
-            $this-> attempts($user->auth_usern, '-');
+            $this-> attempts($user->auth_email, '-');
             return $user;
         }
 
         return $this->_ci->session->messageInvalid('Account Blocked (Too many failed attempts)');
     }
 
-    private function attempts($auth_usern, $action)
+    private function attempts($auth_email, $action)
     {
-        $user = compact('auth_usern');
+        $user = compact('auth_email');
         if($this->exists($user))
         {
             $user = $this->pull($user, 1);

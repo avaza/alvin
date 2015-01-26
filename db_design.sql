@@ -10,15 +10,15 @@
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `auth_usern` varchar(75) NOT NULL,
+  `auth_email` varchar(75) NOT NULL,
   `auth_passw` varchar(40) NOT NULL,
   `auth_creds` varchar(255) DEFAULT NULL,
   `auth_level` int(1) unsigned NOT NULL DEFAULT '1',
   `auth_atmpt` int(1) unsigned NOT NULL DEFAULT '0',
   `auth_block` int(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `auth_usern` (`auth_usern`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='System Authentication Table' AUTO_INCREMENT=201 ;
+  UNIQUE KEY `auth_email` (`auth_email`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='System Authentication Table' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS `contacts` (
   `zip` varchar(5) NULL DEFAULT NULL,
   `status` varchar(20) NULL DEFAULT NULL,
   `invite` tinyint(4) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-  UNIQUE KEY `code` (`code`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `contact_code` (`code`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Profile and contact details for Employees, Contractors, and Customers' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -56,17 +56,17 @@ CREATE TABLE IF NOT EXISTS `contacts` (
 -- Table structure for table `divisions`
 --
 
-CREATE TABLE IF NOT EXISTS `divisons` (
+CREATE TABLE IF NOT EXISTS `divisions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `access_id` int(11) NOT NULL,
+  `access_code` int(11) NOT NULL,
   `name` varchar(100) NULL DEFAULT NULL,
   `active` tinyint(4) NOT NULL DEFAULT '1',
   `client_id` int(11) NOT NULL,
   `contact_id` int(11) NULL DEFAULT NULL,
   `collect_req` varchar(255) NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
   UNIQUE KEY `access_code` (`access_code`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Holds all Agency-Divisions data' AUTO_INCREMENT=2289 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Holds all Agency-Divisions data' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -83,9 +83,9 @@ CREATE TABLE IF NOT EXISTS `agencies` (
   `contact_id` int(11) NOT NULL,
   `collect_req` varchar(255) NULL DEFAULT NULL,
   `invoice_req` varchar(255) NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
   UNIQUE KEY `client_code` (`client_code`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Holds all Account-Agencies data' AUTO_INCREMENT=2289 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Holds all Account-Agencies data' AUTO_INCREMENT=1 ;
 -- --------------------------------------------------------
 
 --
@@ -103,9 +103,9 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `contract` varchar(255) NULL DEFAULT NULL,
   `other_fees` varchar(255) NULL DEFAULT NULL,
   `after_hours` varchar(255) NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
   UNIQUE KEY `account_code` (`account_code`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Holds all Client-Accounts data' AUTO_INCREMENT=2289 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Holds all Client-Accounts data' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -119,9 +119,9 @@ CREATE TABLE IF NOT EXISTS `languages` (
   `code` varchar(3) NULL DEFAULT NULL,
   `info` text NULL,  -- JSON additional language information (Later)
   `phonetic` varchar(50) NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
   UNIQUE KEY `language_code` (`code`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Relational - Contacts and Languages (Interpreter Rates)' AUTO_INCREMENT=1054 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Relational - Contacts and Languages (Interpreter Rates)' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -133,12 +133,11 @@ CREATE TABLE IF NOT EXISTS `languages_rates` (
   `account_id` int(11) NOT NULL,
   `subject_id` int(11) NOT NULL,
   `subject_type` varchar(10) NULL DEFAULT NULL,
-  `otp_minute` decimal(1,2) NULL,
-  `vri_minute` decimal(1,2) NULL,
+  `otp_minute` decimal(2,2) NULL,
+  `vri_minute` decimal(2,2) NULL,
   `ons_hour` decimal(3,2) NULL,
-  `tsl_word` decimal(1,2) NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Relational - Language Rates for Clients (accounts) and Interpreters (contacts)' AUTO_INCREMENT=1054 ;
+  `tsl_word` decimal(2,2) NULL
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Relational - Language Rates for Clients (accounts) and Interpreters (contacts)' AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
 
@@ -195,14 +194,12 @@ CREATE TABLE IF NOT EXISTS `calls` (
 
   `invoice_code` int(11) unsigned NOT NULL DEFAULT '0',
   `fail_message` varchar(255) NULL DEFAULT NULL, -- JSON Call calculation error/flag information
-  `invoice_complete`
-  `payment_complete`
-  `created` datetime NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated` datetime NULL ON UPDATE CURRENT_TIMESTAMP,
+  `invoice_complete` tinyint(4) NOT NULL DEFAULT '0',
+  `payment_complete` tinyint(4) NOT NULL DEFAULT '0',
   `deleted` datetime NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uuid` (`uuid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Contains Data for all OTP Sessions' AUTO_INCREMENT=612704 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Contains Data for all OTP Sessions' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -221,4 +218,4 @@ CREATE TABLE IF NOT EXISTS `notes` (
   `updated` datetime NULL ON UPDATE CURRENT_TIMESTAMP,
   `deleted` datetime NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Notes - For ALL Tables & ALL Records' AUTO_INCREMENT=1054 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Notes - For ALL Tables & ALL Records' AUTO_INCREMENT=1 ;

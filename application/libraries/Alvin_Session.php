@@ -124,12 +124,14 @@ class Alvin_Session extends CI_Session {
         return false;
     }
 
-    public function messageInvalid($message, $valid = false)
+    public function messageInvalid($message)
     {
         $this->sess_destroy();
-        $this->flashdata(compact('message'));
+        $this->set_flashdata('message', $message);
+        $invalid = new stdClass();
+        $invalid->valid = false;
 
-        return (object) compact('valid');
+        return $invalid;
     }
 
 

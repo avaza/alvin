@@ -55,9 +55,19 @@ class Auth extends CI_Controller {
     {
         $this->load->model('user_model');
         $user = $this->user_model->authenticate($this->input->post('email'), $this->input->post('password'));
+        if($user->valid)
+        {
+            $this->session->setUser($user);
+        }
 
-        $this->session->set_flashdata('message', $user->message);
 
-        return $user->valid;
+        $this->session->keep_flashdata('message');
+        $this->session->checkAndRedirect();
+    }
+
+    public function reset(){
+        //TODO setup email
+        echo 'email should be sent now to ' . $this->input->post('email');
+        echo '<br/><a href="/">Back to Login</a>';
     }
 }
