@@ -13,7 +13,7 @@
  */
 function printMessages( $message )
 {
-    if(isset($message) && $message)
+    if( $message )
     {
         $markups = parseMessages( $message );
 
@@ -36,12 +36,9 @@ function parseMessages( $messages )
 {
     if( ! isset( $messages )) return false;
 
-    $messages = is_array( $messages ) ? [$messages] : structureMessage( $messages );
+    wrapMessage( $messages );
 
-    foreach($messages as $message)
-        {
-            $markups[] = markupMessage( $message );
-        }
+    $markups[] = markupMessage( $messages );
 
     return empty( $markups ) ? false : $markups;
 }
@@ -50,8 +47,11 @@ function parseMessages( $messages )
  * @param $message
  * @return array
  */
-function structureMessage( $message )
+function wrapMessage( $message )
 {
+    if( is_array( $message ) && isset( $message[ 'type' ], $message[ 'message' ])) return $message;
+    if( is_object( $message ) && isset( $message->type, $message->message )) return (array) $message;
+
     return [
         [ 'message' => $message, 'type' => 'invalid', 'markup' => [] ]
     ];
@@ -80,17 +80,28 @@ function markupMessage( $message )
 }
 
 /**
- * @param $message
+ * @param $object /stdClass
+ * @param $message string
  *
  * @return \stdClass
  */
-function invalidWith( $message = null )
+function invalidWith( $message, $object = [] )
 {
-    $response = new stdClass();
-    $response->valid = false;
-    $response->message = [ 'type' => 'invalid', 'message' => $message ];
+    if( is_array( $object )) $object = (object) $object;
 
-    return $response;
+    if( ! is_object( $object )) $object = new stdClass();
+
+    $object->valid = false;
+    $messages = [ 'type' => 'invalid', 'message' => $message ];
+
+    if( isset( $object->message ) && is_array( $object->message ))
+    {
+        $messages = [ $object->message[ 'message' ], $message ];
+    }
+
+    $object->message = $messages;
+
+    return $object;
 }
 
 /**

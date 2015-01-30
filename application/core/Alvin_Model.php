@@ -15,7 +15,7 @@ class Alvin_Model extends CI_Model {
 
     protected $table;
 
-    protected $form;
+    protected $compress;
 
     function __construct()
     {
@@ -54,6 +54,8 @@ class Alvin_Model extends CI_Model {
      */
     public function push($params)
     {
+        $params = $this->adapt( 'compress', $params );
+
         switch($this->exists($params))
         {
             case true:
@@ -82,16 +84,17 @@ class Alvin_Model extends CI_Model {
      */
     public function pull($params = null, $max = 0)
     {
+        $params = $this->adapt( 'decompress', $params );
+
         $max = $max > 0 ? $max : null;
         foreach($params as $column => $value)
         {
             $this->db->where($column, $value);
         }
         $query = $this->db->get($this->table, $max);
-        $result = $query->result();
-        if($query->result())
+        if( $query->result())
         {
-            return $this->parseResult($result);
+            return $this->parseResult( $query->result());
         }
 
         return false;
@@ -105,6 +108,8 @@ class Alvin_Model extends CI_Model {
      */
     public function wipe($params = null)
     {
+        $params = $this->adapt( 'compress', $params );
+
         if($this->exists($params))
         {
             $this->db->where('id', $params['id']);
@@ -120,16 +125,17 @@ class Alvin_Model extends CI_Model {
 
     /**
      * Creates a NEW database record from $params
-     * @param array $params - (Array of values to be inserted into the table)
-     *
+     * @param array $params - (Array of values to be located)
+     * @param boolean $return - (return result yes/no)
      * @return boolean
      */
-    public function exists($params)
+    public function exists($params, $return = false)
     {
         $query = $this->pull($params);
         if($query)
         {
-            return ($query->num_rows() > 0);
+            if( $return ) return $query;
+            return ( $query );
         }
 
         if(isset($params['id']))
@@ -151,7 +157,7 @@ class Alvin_Model extends CI_Model {
     protected function create($params)
     {
         $this->db->insert($this->table, $params);
-        return ($this->db->affected_rows() > 0);
+        return $this->db->affected_rows() > 0;
     }
 
     /**
@@ -164,7 +170,99 @@ class Alvin_Model extends CI_Model {
     {
         $this->db->where('id', $params['id']);
         $this->db->update($this->table, $params);
-        return ($this->db->affected_rows() > 0);
+        return $this->db->affected_rows() > 0;
+    }
+
+    protected function adapt( $action = 'compress', $object )
+    {
+        if( ! is_object( $object ) && ! is_array( $object )) return false;
+
+        if( is_array( $object )) $adapted = (object) $object;
+
+        if( ! isset( $adapted )) $adapted = $object;
+
+        if( isset( $this->compress ) && ! empty( $this->compress[ 'columns' ]))
+        {
+            $object = call_user_func_array([ $this, $action ], [ $adapted, $this->compress[ 'columns' ]]);
+        }
+
+        return $object;
+    }
+
+    protected function compress($object, $columns)
+    {
+        foreach( $columns as $column ):
+
+            $items = isset( $compress[ $column ]) ? $compress[ $column ] : [];
+
+            $object = $this->compressColumn( $object, $column, $items );
+
+        endforeach;
+
+        $object->$column = json_encode( $object->$column );
+
+        return $object;
+    }
+
+    private function compressColumn( $object, $column, $items )
+    {
+        foreach( $items as $item ):
+
+            $object->$column[ $item ] = $this->compressItem($object, $item);
+
+        endforeach;
+
+        return $object;
+    }
+
+    private function compressItem( $object, $item, $value = null )
+    {
+        if( isset( $object->$item ))
+        {
+            $value =  $object->$item;
+            unset( $object->$item );
+        }
+
+        return $value;
+    }
+
+    protected function decompress($object, $columns)
+    {
+        foreach( $columns as $column ):
+
+            if( ! isset( $object->$column )) $object->$column = json_encode([]);
+
+            $compressed = json_decode( $object->$column );
+
+            $items = isset( $compressed ) ? $compressed : [];
+
+            $object = $this->decompressColumn( $object, $compressed, $items);
+
+        endforeach;
+
+        return $object;
+    }
+
+    private function decompressColumn( $object, $compressed, $items )
+    {
+        foreach( $items as $item ):
+
+            $object->$item = $this->decompressItem( $compressed, $item );
+
+        endforeach;
+
+        return $object;
+    }
+
+    private function decompressItem( $compressed, $item, $value = null )
+    {
+        if( isset( $compressed[ $item ]))
+        {
+            $value =  $compressed[ $item ];
+            unset( $compressed[ $item ] );
+        }
+
+        return $value;
     }
 
     /**
@@ -176,22 +274,60 @@ class Alvin_Model extends CI_Model {
      */
     protected function parseResult($result, $options = [])
     {
-        if(count($options) > 0)
-        {
-            //TODO
-        }
+        $default = [ 'raw' => false, 'as' => 'object', 'custom' => [] ];
+        $options = array_merge( $default, $options );
 
-        if(is_array($result) && count($result) === 1)
-        {
-            return $result['0'];
-        }
+        if( $options['raw'] ) return $result;
+
+        $result = call_user_func_array(
+            [ $this, $options[ 'as' ] . 'Results' ],
+            [ $result, $options[ 'custom' ]]
+        );
+
         return $result;
     }
+
+    protected function objectResults( $result, $custom = [] )
+    {
+        if( is_object( $result )) return $result;
+
+        if( ! is_array( $result )) return false;
+
+        if( count( $result ) === 1 && is_object( $result['0'] )) return $result['0'];
+
+        if( empty( $custom )) return $result;
+    }
+
+    protected function arrayResults( $result, $custom = [] )
+    {
+        if( is_object( $result )) return (array) $result;
+
+        if( ! is_array( $result )) return false;
+
+        if( count( $result ) === 1 && is_object( $result['0'] )) return (array) $result['0'];
+
+        if( empty( $custom )) return (array) $result;
+    }
+
+    protected function jsonResults( $result, $custom = [] )
+    {
+        if( is_object( $result )) return json_encode( $result );
+
+        if( ! is_array( $result )) return json_encode( false );
+
+        if( count( $result ) === 1 && is_object( $result['0'] )) json_encode( $result['0'] );
+
+        if( empty( $custom )) return json_encode( $result );
+    }
+
+
 
     protected function validate($formData)
     {
         return $this->_ci->validator->execute($this->table, $formData);
     }
+
+
 }
     
     

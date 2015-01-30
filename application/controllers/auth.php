@@ -18,31 +18,37 @@ class Auth extends CI_Controller {
     /**
      * Site-wide entry point (All unauthenticated requests are redirected here)
      *
-     * @return void
+     * @return mixed
      */
     public function index()
     {
+        $this->login();
+    }
+
+    /**
+     * All unauthenticated requests are redirected here by extension of "index()"
+     *
+     * @return mixed
+     */
+    public function login()
+    {
         $this->details['view'] = 'login';
+
+        if( ! $this->input->post())
+        {
+            $user = $this->authenticate();
+            if( $user->valid )
+            {
+                $this->session->setUser($user);
+                redirect('home');
+            }
+        }
 
         $this->load->view('gui', $this->details);
     }
 
-    public function login()
-    {
-        $user = $this->authenticate();
-
-        if( ! $user->valid)
-        {
-            $this->details['message'] = $user->message;
-        }
-
-        $this->session->setUser($user);
-        
-        return redirect('home');
-    }
-
     /**
-     * @return void
+     * @return mixed
      */
     public function logout()
     {
@@ -50,7 +56,7 @@ class Auth extends CI_Controller {
 
         $this->details['message'] = 'Successfully Logged Out';
 
-        return $this->index();
+        redirect('auth');
     }
 
     /**
@@ -68,7 +74,7 @@ class Auth extends CI_Controller {
             $this->input->post('password')
         );
 
-        $user->message = isset( $errors ) ? $errors : null;
+        $this->details['message'] = isset( $errors ) ? $errors : null;
 
         return $user;
     }
