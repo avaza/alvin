@@ -23,18 +23,22 @@ class Auth extends CI_Controller {
      */
     public function index()
     {
-        $this->load->view('gui', 'login');
+        $this->details['view'] = 'login';
+
+        $this->load->view('gui', $this->details);
     }
 
-    /**
-     * @return void
-     */
     public function login()
     {
         $this->load->library('form_validation');
-        $this->form_validation->run();
 
-        $this->session->checkAndRedirect();
+        if( ! $this->form_validation->run())
+        {
+            $this->details['message'] = validation_errors();
+            $this->index();
+        }
+
+        $this->authenticate();
     }
 
     /**
@@ -54,14 +58,16 @@ class Auth extends CI_Controller {
     public function authenticate()
     {
         $this->load->model('user_model');
+
         $user = $this->user_model->authenticate($this->input->post('email'), $this->input->post('password'));
-        if($user->valid)
+
+        if( ! $user->valid)
         {
-            $this->session->setUser($user);
+            $this->details['message'] = $user->message;
         }
 
+        $this->session->setUser($user);
 
-        $this->session->keep_flashdata('message');
         $this->session->checkAndRedirect();
     }
 

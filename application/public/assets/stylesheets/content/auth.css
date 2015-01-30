@@ -1,49 +1,104 @@
 /*
-*
-* =============================== MOCK STYLESHEET ===============================
-*
+* =============================== AUTH STYLESHEET ===============================
 */
-body {
+
+/* Main Body */
+html{
+    height:100%;
+    width:100%;
+}
+body{
     background: url(../../images/resources/special-page-bg.png) no-repeat scroll top center #2b3237;
+    height:100%;
+    width:100%;
 }
 
-.center_div, #flip-auth{
+#body.container{
+    padding-top: 160px;
+    height: 100%;
+    width: 100%;
+}
+
+/* Primary Container */
+.row.flipper{
     margin: 0 auto;
-    width: 100%
+    width: 300px;
+    height: 500px;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transition: transform 0.8s;
 }
-
-/*
-Error Messages
-*/
-.alert{
-	margin: 20px auto;
-	width: 70%;
+/* Flip Faces */
+.front, .back{
+    background: url(../../images/resources/brushed-steel.jpg) no-repeat center;
+    background-size: cover;
+    border-radius: 8px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5), inset 1px 1px 2px rgba(255, 255, 255, 0.5);
+	position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    visibility: visible;
 }
-
-/*
- Primary Form Container
-*/
-#flip-auth, .flip-container, .front, .back{
-    min-width: 280px;
-    min-height: 400px;
+.back{
+    transform: rotateY(180deg);
+    visibility: hidden;
 }
-
-
-/*
-Image Logo
-*/
+.flipper.flipped{
+    transform: rotateY(180deg);
+}
+.flipper.flipped .front{
+    visibility: hidden;
+}
+.flipper.flipped .back{
+    visibility: visible;
+}
+.flipper.flipped .back .login-form .login-links{
+    display:block;
+}
+.flipper .back .login-form .login-links{
+    display:none;
+}
+/* Image Logo */
 .logo-login{
     padding: 10px 10px 10px 10px;
 }
 .logo-image{
     min-height: 125px;
-    background: url(../../images/avaza_logo_white.svg) no-repeat center;
+    background: url(../../images/avaza_logo.svg) no-repeat center;
+    filter: drop-shadow( -2px -2px 3px #FFF );
     background-size: contain;
 }
+/* Logo Animation */
 
-/*
-Login Form
-*/
+.logo-image{
+    -webkit-animation: logo-animation 2s infinite;
+    animation: logo-animation 2s infinite;
+}
+@-webkit-keyframes logo-animation {
+    0%{
+        -webkit-filter: drop-shadow( -3px -3px 4px #FFF );
+    }
+    50%{
+        -webkit-filter: drop-shadow( -3px -3px 4px #bfbfbf );
+    }
+    100%{
+        -webkit-filter: drop-shadow( -3px -3px 4px #FFF );
+    }
+}
+@keyframes logo-animation {
+    0%{
+            filter: drop-shadow( -3px -3px 4px #FFF );
+        }
+        50%{
+            filter: drop-shadow( -3px -3px 4px #bfbfbf );
+        }
+        100%{
+            filter: drop-shadow( -3px -3px 4px #FFF );
+        }
+}
+
+/* Login Form */
 .login-form input{
 	display: block;
 	margin:0 auto 15px;
@@ -65,17 +120,14 @@ Login Form
 	width:80%;
 	margin: 5px auto 10px;
 	text-align: center;
-	color:#FFF;
+    color: #FFF;
+    background: #006799;
 	text-shadow: 1px 1px 2px #000;
-	background: rgba(0, 0, 0, 0.25);
-	border-radius: 5px;
-	padding: 5px;
+	border-radius: 3px;
+	padding: 3px;
 }
-
-/*
-Login/Reset Buttons
-*/
-.btn.btn-login {
+/* Login/Reset Buttons */
+.btn.btn-login{
 	font-weight: bold;
 	font-size: 0.9em;
 	width: 120px;
@@ -88,41 +140,54 @@ Login/Reset Buttons
 	border: 1px solid #006799;
 	box-shadow: inset 0 1px 2px #5CA7CC;
 	transition: background .5s ease-in-out;
-
 }
 .btn.btn-login:hover {
-	background: #006799;
+    background: #006799;
 }
 .btn.btn-reset{
 	width: 180px;
 }
-
-/*
-Form Flip Links
-*/
+/* Form Flip Links */
 .login-links{
 	text-align: center;
-	background: rgba(0, 0, 0, 0.3);
-	padding: 5px 0;
+	padding: 5px 0 40px;
 }
 .login-links a{
-	color: #FFF;
+	color: #006799;
 	display: inline-block;
 	padding: 5px;
-	transition: all .5s ease;
-	text-shadow: 1px 1px 2px #000;
+    text-shadow: 1px 1px 2px #FFF;
 }
 .login-links a:hover{
     cursor: pointer;
 	text-decoration: none;
 	color: #FFF;
-	background: rgba(0, 0, 0, 0.25);
-	border-radius: 5px;
+	background: #339ACC;
+    border: 1px solid #006799;
+	border-radius: 3px;
+    text-shadow: 1px 1px 2px #000;
+}
+/* Error Messages */
+.alert{
+    margin: 0 auto 5px;
+    width:80%;
+    text-align: center;
+    text-shadow: 1px 1px 2px #FFF;
+    border-radius: 3px;
+    padding: 5px;
+}
+.alert-invalid{
+    color: #490000;
+    border-color: #490000;
+    background: rgba(224,170,170,.25);
+}
+.alert-valid{
+    color: #004900;
+    border-color: #004900;
+    background: rgba(170,224,170,.2);
 }
 
-/*
-Footer Text
-*/
+/* Footer Text */
 #footer-text, #footer-text a{
 	text-align: center;
 	color:#FFF;
@@ -130,90 +195,17 @@ Footer Text
 	filter: alpha(opacity=100);
 	text-shadow: 1px 1px 1px #000;
 }
-
-/*
-Mobile Portrait Size to Mobile Landscape Size (devices and browsers)
-*/
+/* Mobile Portrait Size to Mobile Landscape Size (devices and browsers) */
 @media only screen and (max-width: 479px) {
 	#login-block{
 		padding-top: 10px;
 		padding-bottom: 25px;
 	}
 }
-
-/*
-Tablet Portrait Size to Tablet Landscape Size (devices and browsers)
-*/
+/* Tablet Portrait Size to Tablet Landscape Size (devices and browsers) */
 @media only screen and (min-width: 480px) and (max-width: 767px){
 	#login-block {
 		margin: 0 auto;
 		width: 420px;
 	}
 }
-
-/*  Card Flip Effects  */
-.flip-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    perspective: 1000px ;
-}
-/* flip the pane when hovered */
-.flip-container.flipped .flipper{
-    transform: rotateY(180deg);
-}
-
-/* flip speed goes here */
-.flipper {
-	transition: 0.6s;
-    transform-style: preserve-3d;
-	position: relative;
-}
-
-.login-form{
-    backface-visibility: hidden;
-}
-
-/* hide back of pane during swap */
-.front, .back{
-    background: #2f3338;
-    border-radius: 8px;
-    padding-bottom: 20px;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5), inset 1px 1px 2px rgba(255, 255, 255, 0.5);
-	position: absolute;
-	top: 0;
-	left: 0;
-    width: 100%;
-    height: 100%;
-}
-/* back, initially hidden pane */
-.flip-container .front{
-    visibility: visible;
-    transition: 0s;
-}
-
-.flip-container .back{
-    transform: rotateY(180deg);
-    visibility: hidden;
-}
-
-.flip-container.flipped .front{
-    visibility: hidden;
-    transition: 0s;
-}
-
-.flip-container.flipped .back {
-    transform: rotateY(180deg);
-    visibility: visible;
-    transition: 0.6s;
-}
-
-.flip-container.flipped .back .login-form .login-links{
-    display:block;
-}
-
-.flip-container .back .login-form .login-links{
-    display:none;
-}
-
-

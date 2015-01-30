@@ -25,7 +25,7 @@ class User_model extends Alvin_Model {
 
         $this->attempts($auth_email, '+');
 
-        return $this->_ci->session->messageInvalid('Invalid Username and/or Password.');
+        return invalidWith( 'Invalid Username and/or Password.' );
     }
 
     private function authorize($user)
@@ -33,18 +33,18 @@ class User_model extends Alvin_Model {
         $blocked = $user->auth_block == 1 ? true : false;
         if( ! $blocked)
         {
-            $user->valid = true;
-            $this->_ci->session->setUser($user);
+            $this->_ci->session->setUser( validWith( $user ));
             $this-> attempts($user->auth_email, '-');
             return $user;
         }
 
-        return $this->_ci->session->messageInvalid('Account Blocked (Too many failed attempts)');
+        return invalidWith( 'Account Blocked (Too many failed attempts)' );
     }
 
     private function attempts($auth_email, $action)
     {
         $user = compact('auth_email');
+
         if($this->exists($user))
         {
             $user = $this->pull($user, 1);
