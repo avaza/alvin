@@ -13,7 +13,6 @@ class Auth extends CI_Controller {
     function __construct()
     {
         parent::__construct();
-        $this->details['message'] = $this->session->flashdata('message');
     }
 
     /**
@@ -30,15 +29,16 @@ class Auth extends CI_Controller {
 
     public function login()
     {
-        $this->load->library('form_validation');
+        $user = $this->authenticate();
 
-        if( ! $this->form_validation->run())
+        if( ! $user->valid)
         {
-            $this->details['message'] = validation_errors();
-            $this->index();
+            $this->details['message'] = $user->message;
         }
 
-        $this->authenticate();
+        $this->session->setUser($user);
+        
+        return redirect('home');
     }
 
     /**
@@ -47,9 +47,10 @@ class Auth extends CI_Controller {
     public function logout()
     {
         $this->session->destroy();
-        $this->session->set_flashdata('message', 'Successfully Logged Out');
 
-        $this->session->checkAndRedirect();
+        $this->details['message'] = 'Successfully Logged Out';
+
+        return $this->index();
     }
 
     /**
@@ -58,17 +59,18 @@ class Auth extends CI_Controller {
     public function authenticate()
     {
         $this->load->model('user_model');
+        $this->load->library('form_validation');
 
-        $user = $this->user_model->authenticate($this->input->post('email'), $this->input->post('password'));
+        if( ! $this->form_validation->run()) $errors = validation_errors();
 
-        if( ! $user->valid)
-        {
-            $this->details['message'] = $user->message;
-        }
+        $user = $this->user_model->authenticate(
+            $this->input->post('email'),
+            $this->input->post('password')
+        );
 
-        $this->session->setUser($user);
+        $user->message = isset( $errors ) ? $errors : null;
 
-        $this->session->checkAndRedirect();
+        return $user;
     }
 
     public function reset(){

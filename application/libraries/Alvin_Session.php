@@ -8,7 +8,6 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Alvin_Session extends CI_Session {
 
     public $user;
-    public $cuda;
 
     function __construct()
     {
@@ -27,15 +26,16 @@ class Alvin_Session extends CI_Session {
 
     public function setCuda()
     {
-        $valid = $this->_ci->cudatel->session('create', $creds);
+        $user = $this->_ci->cudatel->session('create');
 
-        if($user->valid)
+        if( $user->valid )
         {
-            $this->setCuda($user);
             $this->user = $user;
+
+            return $this->user;
         }
 
-        return $this->user;
+        return invalidWith( $this->user, 'Unable to authenticate in cudaTel System (See System Administrator)' );
     }
 
     /**

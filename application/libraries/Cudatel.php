@@ -19,7 +19,8 @@ class Cudatel {
 
     public function data($command, $url, $params)
     {
-        $params['sessionid'] = $this->_ci->session->cuda;
+        $this->_ci->session->user->sessionid = 0;
+        $params['sessionid'] = $this->_ci->session->user->sessionid;
         $arguments = [ $url, $params ];
 
         $response =  call_user_func_array([$this, $command . 'Data'], $arguments);
@@ -36,6 +37,10 @@ class Cudatel {
     protected function createSession()
     {
         $user = $this->_ci->session->user;
+
+        $user->ext = 5041;
+        $user->pin = 1405;
+
         $creds = [ '__auth_user' => $user->ext, '__auth_pass' => $user->pin ];
 
         if( $this->data('post', '/gui/login/login', $creds) )
@@ -84,9 +89,9 @@ class Cudatel {
         return $this->_ci->curl->fetch($url, $params);
     }
 
-    protected function postData($url, $params)
+    protected function postData($url, $params = [])
     {
-        return $this->_ci->curl->fetch($url, $params, 'POST');
+        return $this->_ci->curl->fetch($url, $params, [ 'type' => 'POST' ]);
     }
 
     protected function postParser($response, $url)

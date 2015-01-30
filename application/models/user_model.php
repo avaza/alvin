@@ -13,35 +13,34 @@ class User_model extends Alvin_Model {
 
     public function authenticate($auth_email, $auth_passw)
     {
-        $auth_passw = $this->hash($auth_passw);
         $user = compact('auth_email', 'auth_passw');
 
-        if($this->exists($user))
-        {
-            $user = $this->pull($user, 1);
-            $user = $this->authorize($user);
-            return $user;
-        }
+        if( $this->invalid( $user )) return invalidWith( 'Invalid Username and/or Password.' );
 
-        $this->attempts($auth_email, '+');
+        $user = $this->pull( $user, 1 );
 
-        return invalidWith( 'Invalid Username and/or Password.' );
+        if( $this->blocked( $user )) return invalidWith( 'Account Blocked (Too many failed attempts)' );
+
+        $this->attempt($user['auth_email'], '-');
+
+        return validWith( $user );
     }
 
-    private function authorize($user)
+    private function invalid($user)
     {
-        $blocked = $user->auth_block == 1 ? true : false;
-        if( ! $blocked)
-        {
-            $this->_ci->session->setUser( validWith( $user ));
-            $this-> attempts($user->auth_email, '-');
-            return $user;
-        }
+        $user['auth_passw'] = $this->hash($user['auth_passw']);
 
-        return invalidWith( 'Account Blocked (Too many failed attempts)' );
+        $this->attempt($user['auth_email'], '+');
+
+        return false == $this->exists( $user );
     }
 
-    private function attempts($auth_email, $action)
+    private function blocked($user)
+    {
+        return $user->auth_block == 1 ? true : false;
+    }
+
+    private function attempt($auth_email, $action)
     {
         $user = compact('auth_email');
 
@@ -53,6 +52,6 @@ class User_model extends Alvin_Model {
             $this->push($user);
         }
 
-        return;
+        return $user;
     }
 }

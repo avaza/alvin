@@ -9,7 +9,7 @@ $config = [
         [
             'field' => 'password',
             'label' => 'Password',
-            'rules' => 'required|callback_authenticate',
+            'rules' => 'required',
         ]
     ],
     'users/create' => [
