@@ -13,7 +13,7 @@ class Alvin_Controller extends CI_Controller {
     function __construct()
     {
         parent::__construct();
-        $this->details['message'] = $this->session->flashdata('message');
+        $this->details[ 'messages' ] = [];
         $this->session->checkAndRedirect();
     }
 

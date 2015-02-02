@@ -12,6 +12,13 @@ $config = [
             'rules' => 'required',
         ]
     ],
+    'auth/reset' => [
+        [
+            'field' => 'email',
+            'label' => 'Email',
+            'rules' => 'required|valid_email',
+        ]
+    ],
     'users/create' => [
         [
             'field' => 'email',

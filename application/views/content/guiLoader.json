@@ -8,11 +8,19 @@
         }
     },
     "mock": {
-            "details":{
-                "pageContent": "mock",
-                "headerTitle": "ARC System Sandbox",
-                "styleSheets": [ "content/mock.css" ],
-                "javaScripts": [ "content/mock.js" ]
-            }
+        "details":{
+            "pageContent": "mock",
+            "headerTitle": "ARC System Sandbox",
+            "styleSheets": [ "content/mock.css" ],
+            "javaScripts": [ "content/mock.js" ]
         }
+    },
+    "home": {
+        "details":{
+            "pageContent": "home",
+            "headerTitle": "ARC System Dashboard",
+            "styleSheets": [ "content/home.css" ],
+            "javaScripts": [ "content/home.js" ]
+        }
+    }
 }

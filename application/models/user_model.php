@@ -27,13 +27,14 @@ class User_model extends Alvin_Model {
 
         $user = $this->getOrFail( $user );
 
-        if( ! $user ) return invalidWith( 'Invalid Username and/or Password.' );
+        if( ! $user ) return message( 'Invalid Username and/or Password.' );
 
-        if( $this->blocked( $user )) return invalidWith( 'Account Blocked (Too many failed attempts)' );
+        if( $this->blocked( $user )) return message( 'Account Blocked ( Too many failed attempts )' );
 
         $this->attempt( $user[ 'auth_email' ], '-' );
 
-        return validWith( $user );
+        return message( null, $user, true );
+
     }
 
     /**

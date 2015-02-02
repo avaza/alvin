@@ -7,8 +7,10 @@ class Home extends Alvin_Controller {
         parent::__construct();
     }
 
-    function index(){
-        $data['main_content'] = 'home';
-        $this->load->view('templates/standard', $data);
+    function index()
+    {
+        $this->details['view'] = 'home';
+
+        $this->load->view('gui', $this->details);
     }
 }

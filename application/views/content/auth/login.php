@@ -1,5 +1,5 @@
 <?php // Login/Authentication View  $messages
-    $messages = isset( $message ) ? $message : null;
+    $messages = isset( $messages ) ? $messages : null;
 ?>
 
 

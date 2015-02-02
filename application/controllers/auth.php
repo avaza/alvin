@@ -13,6 +13,7 @@ class Auth extends CI_Controller {
     function __construct()
     {
         parent::__construct();
+        $this->details[ 'messages' ] = [];
     }
 
     /**
@@ -34,10 +35,10 @@ class Auth extends CI_Controller {
     {
         $this->details['view'] = 'login';
 
-        if( ! $this->input->post())
+        if( ! empty( $this->input->post()))
         {
             $user = $this->authenticate();
-            if( $user->valid )
+            if( $user )
             {
                 $this->session->setUser($user);
                 redirect('home');
@@ -50,11 +51,31 @@ class Auth extends CI_Controller {
     /**
      * @return mixed
      */
+    public function reset()
+    {
+        $this->details['view'] = 'reset';
+
+        if( ! empty( $this->input->post())) $reset = $this->resetPassword();
+
+        $user = isset( $reset ) ? $reset : false;
+        if( $user )
+        {
+            //TODO make this work
+            $this->details[ 'messages' ] = message('EMAIL SENT TO : ' . $this->input->post( 'email' ), null, true);
+            return false;
+        }
+
+        $this->load->view('gui', $this->details);
+    }
+
+    /**
+     * @return mixed
+     */
     public function logout()
     {
         $this->session->destroy();
 
-        $this->details['message'] = 'Successfully Logged Out';
+        $this->details['messages'] = message( 'Successfully Logged Out', null, true );
 
         redirect('auth');
     }
@@ -62,26 +83,60 @@ class Auth extends CI_Controller {
     /**
      * @return boolean
      */
-    public function authenticate()
+    protected function authenticate()
     {
-        $this->load->model('user_model');
-        $this->load->library('form_validation');
+        if( $this->invalid( 'form' )) return false;
 
-        if( ! $this->form_validation->run()) $errors = validation_errors();
+        $this->load->model('user_model');
 
         $user = $this->user_model->authenticate(
-            $this->input->post('email'),
-            $this->input->post('password')
+            $this->input->post( 'email' ),
+            $this->input->post( 'password' )
         );
 
-        $this->details['message'] = isset( $errors ) ? $errors : null;
+        if( $this->invalid( $user )) return false;
 
         return $user;
     }
 
-    public function reset(){
-        //TODO setup email
+    protected function resetPassword()
+    {
+        if( $this->invalid( 'form' )) return false;
+
+        $this->load->model('user_model');
+
+        $user = $this->user_model->exists(
+            [ 'email' => $this->input->post( 'email' )],
+            true
+        );
+
+        if( $this->invalid( $user )) return false;
+
         echo 'email should be sent now to ' . $this->input->post('email');
         echo '<br/><a href="/">Back to Login</a>';
+    }
+
+
+
+    /**
+     * @param null $object
+     * @return bool
+     */
+    protected function invalid( $object = null )
+    {
+        while( empty( $this->details[ 'messages' ]) && ! is_null( $object )):
+
+            if( ! is_object( $object ) && ! empty( $object->messages )) $this->details['messages'] = $object->messages;
+
+            if( $object == 'form')
+            {
+                $this->load->library('form_validation');
+                if( ! $this->form_validation->run()) $this->details[ 'messages' ] = validationMessages();
+            }
+
+            return false;
+        endwhile;
+
+        return true;
     }
 }

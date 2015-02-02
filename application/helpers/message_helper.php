@@ -8,123 +8,131 @@
  */
 
 /**
- * @param $message
+ * @param null  $messages
  * @return bool
  */
-function printMessages( $message )
+function printMessages( $messages = null )
 {
-    if( $message )
-    {
-        $markups = parseMessages( $message );
+    if( is_null( $messages )) return false;
 
-        if( ! $markups) return false;
-
-        foreach($markups as $markup)
-        {
-            echo $markup;
-        }
-    }
+    foreach( $messages as $message ):
+        echo $message['opens'] . $message['message'] . $message['close'];
+    endforeach;
 
     return false;
 }
 
 /**
- * @param $messages
- * @return array|bool
+ * @param null  $message
+ * @param array $object
+ * @param bool  $valid
+ * @param array $markup
+ * @return array|object
  */
-function parseMessages( $messages )
+function message( $message = null, $object = [], $valid = false, $markup = [] )
 {
-    if( ! isset( $messages )) return false;
+    $type = $valid ? 'valid' : 'invalid';
 
-    wrapMessage( $messages );
+    if( is_null( $message )) die( 'Please include a message when calling message()' );
 
-    $markups[] = markupMessage( $messages );
+    if( is_array( $object )) $object = (object) $object;
 
-    return empty( $markups ) ? false : $markups;
+    $object->valid = $valid;
+
+    if( ! isset( $object->messages )) $object->messages = [];
+
+    if( ! is_array( $object->messages )) die( 'Messages structure error' );
+
+    $object->messages = addMessage( $object->messages, $message, $type, $markup );
+
+    return $object;
+}
+
+/**
+ * @param        $messages
+ * @param        $newMessage
+ * @param string $type
+ * @param        $markup
+ * @return array
+ */
+function addMessage( $messages, $newMessage, $type = 'invalid', $markup )
+{
+    $newMessage = wrapMessage( $newMessage, $type, $markup );
+
+    if( ! empty( $newMessage )) $messages[] = $newMessage;
+
+    return $messages;
 }
 
 /**
  * @param $message
+ * @param $type
+ * @param $markup
  * @return array
  */
-function wrapMessage( $message )
+function wrapMessage( $message, $type, $markup )
 {
-    if( is_array( $message ) && isset( $message[ 'type' ], $message[ 'message' ])) return $message;
-    if( is_object( $message ) && isset( $message->type, $message->message )) return (array) $message;
+    $layout = [ 'tag' => 'div', 'class' => "alert alert-{$type}", 'closeable' => true, ];
+    $design = array_merge( $layout, $markup );
 
-    return [
-        [ 'message' => $message, 'type' => 'invalid', 'markup' => [] ]
-    ];
+    $markup = getMarkup( $design );
+
+    return array_merge( compact( 'message' ), $markup );
 }
 
 /**
- * @param array $message
- *
- * @return string
+ * @param $design
+ * @return array
  */
-function markupMessage( $message )
+function getMarkup( $design )
 {
-    $markup = [ 'ctTag' => 'div', 'class' => 'alert alert-', 'close' => true, ];
-    $design = array_merge( $markup, $message );
+    extract( $design );
 
-    // OPEN TAG WITH CLASS NAME
-    $prepared  = "<{$design['ctTag']} class=\"{$design['class']}{$design['type']}\">\n";
-    // INCLUDE CLOSE WITH X
-    if($design['close']) $prepared .= "<button class=\"close\" data-dismiss=\"alert\">&times;</button>\n";
-    // MESSAGE TEXT
-    $prepared .= $design['message'];
-    //CLOSE TAG
-    $prepared .= "\n</{$design["ctTag"]}>\n";
+    if( ! isset( $tag, $class, $closeable )) return [];
 
-    return $prepared;
+    $opens = "<{$tag} class=\"{$class}\">\n";
+    $opens.= $closeable ? "<button class=\"close\" data-dismiss=\"alert\">&times;</button>\n" : '';
+    $close = "\n</{$tag}>\n";
+
+    return compact( 'opens', 'close' );
 }
 
 /**
- * @param $object /stdClass
- * @param $message string
- *
- * @return \stdClass
+ * @return array|object
  */
-function invalidWith( $message, $object = [] )
+function validationMessages()
 {
-    if( is_array( $object )) $object = (object) $object;
+    $errors = [];
+    $string = validation_errors();
+    $tags = [ '<p>', '</p>' ];
+    $messages = multiExplode( $string, $tags );
 
-    if( ! is_object( $object )) $object = new stdClass();
+    $validation = [];
 
-    $object->valid = false;
-    $messages = [ 'type' => 'invalid', 'message' => $message ];
+    foreach( $messages as $message ):
+        $validation = (array) message( $message, $errors );
+    endforeach;
 
-    if( isset( $object->message ) && is_array( $object->message ))
-    {
-        $messages = [ $object->message[ 'message' ], $message ];
-    }
-
-    $object->message = $messages;
-
-    return $object;
+    return $validation['messages'];
 }
 
 /**
- * @param string $message
- * @param \stdClass $object
- *
- * @return \stdClass
+ * @param null  $string
+ * @param array $delimiters
+ * @return array|bool
  */
-function validWith( $object, $message = null )
+function multiExplode( $string = null, $delimiters = [] )
 {
-    if(is_object( $object )) $object->valid = true;
+    if( is_null( $string ) || ! is_array( $delimiters ) || empty( $delimiters )) return false;
 
-    if( ! is_null( $message )) $object->message = [ 'type' => 'valid', 'message' => $message ];
+    $strLimit = '';
 
-    return $object;
-}
+    foreach( $delimiters as $i => $delimiter ):
+        $strLimit .= preg_quote( $delimiter ) . '|';
+    endforeach;
 
-/**
- * @param $response
- * @return mixed
- */
-function extractMessage( $response )
-{
-    return $response->message;
+    $strLimit .= "\\n";
+
+    return preg_split(":({$strLimit}):", trim( $string ), 0, PREG_SPLIT_NO_EMPTY);
 }
 
