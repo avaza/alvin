@@ -10,9 +10,15 @@ class User_model extends Alvin_Model {
         $this->_ci->load->library('session');
 
         $this->table = 'users';
+
         $this->compress = [
             'columns' => [ 'auth_creds' ],
             'auth_creds' => [ 'ext', 'pin' ]
+        ];
+
+        $this->parser = [
+            'email' => 'auth_email',
+            'password' => 'auth_passw'
         ];
     }
 
@@ -79,15 +85,16 @@ class User_model extends Alvin_Model {
         return $user;
     }
 
-    protected function parseInput( $input = [] )
+    protected function parseInput()
     {
-        $parser = [
-            'email' => 'auth_email',
-            'password' => 'auth_passw',
-            'auth_creds',
-            'auth_level',
-            'auth_atmpt',
-            'auth_block'
-        ];
+        if( ! isset( $this->parser )) return $this->input->post( null, true );
+
+        $parsed = ['input' => $this->input->post( null, true )];
+
+        foreach($this->parser as $input => $parse):
+            $parsed[ $parse ] = $this->input->post( $input, true );
+        endforeach;
+
+        return $parsed;
     }
 }

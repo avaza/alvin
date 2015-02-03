@@ -338,6 +338,19 @@ class Alvin_Model extends CI_Model {
     {
         return $this->_ci->validator->execute($this->table, $formData);
     }
+    
+    protected function parseInput()
+    {
+        if( ! isset( $this->parser )) return $this->input->post( null, true );
+
+        $parsed = ['input' => $this->input->post( null, true )];
+
+        foreach($this->parser as $input => $parse):
+            $parsed[ $parse ] = $this->input->post( $input, true );
+        endforeach;
+
+        return $parsed;
+    }
 
 
 }
