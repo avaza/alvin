@@ -1,0 +1,11 @@
+/* Image Logo */
+.logo{
+    padding: 5px 5px 5px 5px;
+}
+.logo-image{
+    min-height: 35px;
+    min-width: 150px;
+    background: url(../../images/avaza_logo_white_name_only.svg) no-repeat left;
+    filter: drop-shadow( -2px -2px 3px #000 );
+    background-size: 100% 100%;
+}

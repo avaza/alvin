@@ -1,26 +1,65 @@
 {
-    "login": {
-        "details":{
-            "pageContent": "auth/login",
-            "headerTitle": "ARC System Login",
-            "styleSheets": [ "libraries/animate.css", "libraries/flip_form.css", "content/auth.css" ],
-            "javaScripts": [ "content/auth.js" ]
-        }
-    },
-    "mock": {
-        "details":{
-            "pageContent": "mock",
-            "headerTitle": "ARC System Sandbox",
-            "styleSheets": [ "content/mock.css" ],
-            "javaScripts": [ "content/mock.js" ]
-        }
-    },
     "home": {
-        "details":{
+        "details": {
+            "guiTemplate": "main",
             "pageContent": "home",
             "headerTitle": "ARC System Dashboard",
-            "styleSheets": [ "content/home.css" ],
-            "javaScripts": [ "content/home.js" ]
+            "styleSheets": ["content/home.css"],
+            "javaScripts": ["content/home.js"]
+        }
+    },
+    "login": {
+        "details": {
+            "pageContent": "auth/login",
+            "headerTitle": "ARC System Login",
+            "styleSheets": ["libraries/animate.css", "libraries/flip_form.css", "content/auth.css"],
+            "javaScripts": ["content/auth.js"]
+        }
+    },
+    "reset": {
+        "details": {
+            "pageContent": "auth/reset",
+            "headerTitle": "ARC System Login",
+            "styleSheets": ["libraries/animate.css", "libraries/flip_form.css", "content/auth.css"],
+            "javaScripts": ["content/auth.js"]
+        }
+    },
+    "users-index":{
+        "details": {
+            "guiTemplate": "main",
+            "pageContent": "users/index",
+            "headerTitle": "ARC Users Index",
+            "styleSheets": ["content/users.css"],
+            "javaScripts": ["content/users.js"]
+        }
+    },
+    "users-create":{
+        "details": {
+            "guiTemplate": "main",
+            "pageContent": "users/create",
+            "headerTitle": "ARC Create User",
+            "styleSheets": ["content/users.css"],
+            "javaScripts": ["content/users.js"]
+        }
+    },
+    "users-edit":{
+        "details": {
+            "guiTemplate": "main",
+            "pageContent": "users/edit",
+            "headerTitle": "ARC Edit User",
+            "styleSheets": ["content/users.css"],
+            "javaScripts": ["content/users.js"]
+        }
+    },
+
+
+    "mock": {
+        "details": {
+            "guiTemplate": "main",
+            "pageContent": "mock",
+            "headerTitle": "ARC System Sandbox",
+            "styleSheets": ["content/mock.css"],
+            "javaScripts": ["content/mock.js"]
         }
     }
 }

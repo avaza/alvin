@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-placeholder/2.0.8/jquery.placeholder.min.js"></script>
     <script src="/assets/javascripts/all.js"></script>
     <?php
-        if( isset($javaScripts) && !empty($javaScripts)):
+        if( isset( $javaScripts ) && ! empty( $javaScripts )):
             foreach( $javaScripts as $script ):
                 echo "<script src=\"/assets/javascripts/{$script}\"></script>\n";
             endforeach;

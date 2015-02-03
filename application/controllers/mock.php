@@ -11,6 +11,8 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Mock extends CI_Controller{
 
+    protected $details;
+
     function __construct()
     {
         parent::__construct();
@@ -18,5 +20,13 @@ class Mock extends CI_Controller{
 
     function index(){
         $this->load->view('gui', 'mock');
+    }
+
+    function gui()
+    {
+        $this->details['template'] = 'main';
+        $this->details['view'] = 'mock';
+
+        $this->load->view( 'gui', $this->details );
     }
 }

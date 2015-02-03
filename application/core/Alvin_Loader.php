@@ -38,7 +38,6 @@ class Alvin_Loader extends CI_Loader {
 
             return $details;
         }
-
         die('The viewLoader ' . $view . 'Loader.json cannot be found');
     }
 }

@@ -3,10 +3,48 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Users extends Alvin_Controller {
      
-    function __construct(){
+    function __construct()
+    {
         parent::__construct();
-        $this->load->library('grocery_CRUD');
+        $this->load->model( 'user_model' );
     }
+
+    public function index()
+    {
+        $this->details[ 'view' ] = 'users-index';
+        $this->details[ 'data' ] = $this->user_model->all();
+
+        $this->load->view( 'gui', $this->details );
+    }
+
+    public function create()
+    {
+        $this->details[ 'view' ] = 'users-create';
+
+        $this->load->view( 'gui', $this->details );
+    }
+
+    public function edit( $id )
+    {
+        $this->details[ 'view' ] = 'users-edit';
+        $this->details[ 'data' ] = $this->user_model->find( $id );
+
+        $this->load->view( 'gui', $this->details );
+    }
+
+    protected function set()
+    {
+        if( $this->isNotValid( 'form' )) return false;
+
+        $user = $this->user_model->parseInput( $this->input->post( null, true));
+        $user = $this->user_model->push( $user );
+
+        if( $this->isNotValid( $user )) return false;
+
+        return $user;
+    }
+
+
 
     /**
      * Retrieve session credentials and display as JSON string
@@ -18,18 +56,6 @@ class Users extends Alvin_Controller {
         $this->details = $this->session->user;
 
         $this->load->view('api', $this->data());
-    }
-
-    /**
-     * Load primary Users View
-     *
-     * @param null $message
-     */
-    function index($message = NULL){
-        $data['message'] = $message;
-        $data['main_content'] = 'dashboard';
-        $data['credentials'] = $this->credentials();
-        $this->load->view('includes/template', $data);
     }
 
     //ADD USER

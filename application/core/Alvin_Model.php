@@ -100,6 +100,18 @@ class Alvin_Model extends CI_Model {
         return false;
     }
 
+    protected function all()
+    {
+        return $this->pull();
+    }
+
+    protected function find( $id )
+    {
+        $find = ['id' => $id];
+
+        return $this->pull( $find );
+    }
+
     /**
      * Destroys a database record where "id" = params["id"]
      * @param mixed $params

@@ -85,7 +85,7 @@ class Auth extends CI_Controller {
      */
     protected function authenticate()
     {
-        if( $this->invalid( 'form' )) return false;
+        if( $this->isNotValid( 'form' )) return false;
 
         $this->load->model('user_model');
 
@@ -94,35 +94,32 @@ class Auth extends CI_Controller {
             $this->input->post( 'password' )
         );
 
-        if( $this->invalid( $user )) return false;
+        if( $this->isNotValid( $user )) return false;
 
         return $user;
     }
 
     protected function resetPassword()
     {
-        if( $this->invalid( 'form' )) return false;
+        if( $this->isNotValid( 'form' )) return false;
 
         $this->load->model('user_model');
 
         $user = $this->user_model->exists(
-            [ 'email' => $this->input->post( 'email' )],
+            [ 'auth_email' => $this->input->post( 'email' )],
             true
         );
 
-        if( $this->invalid( $user )) return false;
+        if( $this->isNotValid( $user )) return false;
 
-        echo 'email should be sent now to ' . $this->input->post('email');
-        echo '<br/><a href="/">Back to Login</a>';
+        return true;
     }
-
-
 
     /**
      * @param null $object
      * @return bool
      */
-    protected function invalid( $object = null )
+    protected function isNotValid( $object = null )
     {
         while( empty( $this->details[ 'messages' ]) && ! is_null( $object )):
 

@@ -17,8 +17,26 @@ class Alvin_Controller extends CI_Controller {
         $this->session->checkAndRedirect();
     }
 
-    protected function data()
+    /**
+     * @param null $object
+     * @return bool
+     */
+    protected function isNotValid( $object = null )
     {
-        return [ 'details' => $this->details ];
+        while( empty( $this->details[ 'messages' ]) && ! is_null( $object )):
+
+            if( ! is_object( $object ) && ! empty( $object->messages )) $this->details['messages'] = $object->messages;
+
+            if( $object == 'form')
+            {
+                $this->load->library('form_validation');
+                if( ! $this->form_validation->run()) $this->details[ 'messages' ] = validationMessages();
+            }
+
+            return false;
+        endwhile;
+
+        return true;
     }
+
 }

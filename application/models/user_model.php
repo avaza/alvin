@@ -78,4 +78,16 @@ class User_model extends Alvin_Model {
 
         return $user;
     }
+
+    protected function parseInput( $input = [] )
+    {
+        $parser = [
+            'email' => 'auth_email',
+            'password' => 'auth_passw',
+            'auth_creds',
+            'auth_level',
+            'auth_atmpt',
+            'auth_block'
+        ];
+    }
 }
