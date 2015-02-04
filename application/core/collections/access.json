@@ -1,0 +1,53 @@
+{
+    "actions": {
+        "view": "1",
+        "edit": "2",
+        "wipe": "3"
+    },
+    "staff": {
+        "resources": {
+            "1": "Call Records",
+            "2": "On Sites",
+            "3": "Translation Documents",
+            "4": "Video Sessions",
+            "5": "Schedules",
+            "6": "Languages",
+            "7": "Clients",
+            "8": "Rates",
+            "9": "Users",
+            "10": "Contacts",
+            "11": "Reports",
+            "12": "Invoices"
+        }
+    },
+    "interpreter": {
+        "resources": {
+            "1": "User Records",
+            "3": "User Sites",
+            "4": "User Documents",
+            "5": "User Sessions",
+            "6": "User Schedules",
+            "9": "User Rates",
+            "10": "User User",
+            "11": "User Contact",
+            "12": "User Reports",
+            "13": "User Invoices"
+        }
+    },
+    "client": {
+        "resources": {
+            "1": "Client Call Records",
+            "2": "Client On Sites",
+            "3": "Client Translation Documents",
+            "4": "Client Video Sessions",
+            "5": "Client Schedules",
+            "6": "Client Agencies",
+            "7": "Client Divisions",
+            "8": "Client Rates",
+            "9": "Client Users",
+            "10": "Client Contacts",
+            "11": "Client Reports",
+            "12": "Client Invoices"
+        }
+    }
+}

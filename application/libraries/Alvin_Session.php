@@ -14,6 +14,7 @@ class Alvin_Session extends CI_Session {
         parent::__construct();
         $this->_ci =& get_instance();
         $this->_ci->load->library('cudatel');
+        $this->user = false;
     }
 
     public function setUser($user)

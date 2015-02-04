@@ -271,7 +271,7 @@ class Nendtime_model extends CI_Model{
     }
 }
 
-class Call extends CI_Model{
+class SHIT extends CI_Model{
 
     function __construct($u, $s, $v){
         parent::__construct();

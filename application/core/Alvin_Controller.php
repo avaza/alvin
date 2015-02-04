@@ -17,6 +17,11 @@ class Alvin_Controller extends CI_Controller {
         $this->session->checkAndRedirect();
     }
 
+    protected function wasPosted()
+    {
+        return $this->input->post( null, true ) !== false;
+    }
+
     /**
      * @param null $object
      * @return bool

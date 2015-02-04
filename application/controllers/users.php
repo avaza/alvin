@@ -18,21 +18,25 @@ class Users extends Alvin_Controller {
     }
 
     public function create()
-    {
-        $this->details[ 'view' ] = 'users-create';
+        {
+            if( $this->wasPosted()) $this->post();
 
-        $this->load->view( 'gui', $this->details );
-    }
+            $this->details[ 'view' ] = 'users-create';
 
-    public function edit( $id )
-    {
-        $this->details[ 'view' ] = 'users-edit';
-        $this->details[ 'data' ] = $this->user_model->find( $id );
+            $this->load->view( 'gui', $this->details );
+        }
 
-        $this->load->view( 'gui', $this->details );
-    }
+        public function edit( $id )
+        {
+            if( $this->wasPosted()) $this->post();
 
-    protected function set()
+            $this->details[ 'view' ] = 'users-edit';
+            $this->details[ 'data' ] = $this->user_model->find( $id );
+
+            $this->load->view( 'gui', $this->details );
+        }
+
+    protected function post()
     {
         if( $this->isNotValid( 'form' )) return false;
 
@@ -43,8 +47,6 @@ class Users extends Alvin_Controller {
 
         return $user;
     }
-
-
 
     /**
      * Retrieve session credentials and display as JSON string

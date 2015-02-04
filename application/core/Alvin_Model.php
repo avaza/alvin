@@ -100,12 +100,12 @@ class Alvin_Model extends CI_Model {
         return false;
     }
 
-    protected function all()
+    public function all()
     {
         return $this->pull();
     }
 
-    protected function find( $id )
+    public function find( $id )
     {
         $find = ['id' => $id];
 
@@ -338,8 +338,8 @@ class Alvin_Model extends CI_Model {
     {
         return $this->_ci->validator->execute($this->table, $formData);
     }
-    
-    protected function parseInput()
+
+    public function parseInput()
     {
         if( ! isset( $this->parser )) return $this->input->post( null, true );
 
@@ -352,7 +352,18 @@ class Alvin_Model extends CI_Model {
         return $parsed;
     }
 
+    public function collection( $name , $json = false )
+    {
+        $collection = '/opt/alvin/core/collections/' . $name . '.json';
 
+        if( ! file_exists( $collection )) die( 'No collection by name : ' . $name );
+
+        $data = file_get_contents( $collection );
+
+        if( $json ) return $data;
+
+        return json_decode( $data, true );
+    }
 }
     
     

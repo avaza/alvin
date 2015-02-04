@@ -5,15 +5,18 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  * Class Auth
  *
  * @property Alvin_Session $session
+ * @property User $user
  */
 class Auth extends CI_Controller {
 
     protected $details;
+    protected $user;
 
     function __construct()
     {
         parent::__construct();
         $this->details[ 'messages' ] = [];
+        $this->user = $this->session->user;
     }
 
     /**
@@ -23,7 +26,10 @@ class Auth extends CI_Controller {
      */
     public function index()
     {
-        $this->login();
+        //TODO session user must be false or object
+        if( ! $this->user ) $this->login();
+
+        redirect('home');
     }
 
     /**
@@ -33,19 +39,8 @@ class Auth extends CI_Controller {
      */
     public function login()
     {
-        $this->details['view'] = 'login';
-
-        if( ! empty( $this->input->post()))
-        {
-            $user = $this->authenticate();
-            if( $user )
-            {
-                $this->session->setUser($user);
-                redirect('home');
-            }
-        }
-
-        $this->load->view('gui', $this->details);
+        $this->setView('login');
+        $this->loadView('gui');
     }
 
     /**
@@ -53,19 +48,8 @@ class Auth extends CI_Controller {
      */
     public function reset()
     {
-        $this->details['view'] = 'reset';
-
-        if( ! empty( $this->input->post())) $reset = $this->resetPassword();
-
-        $user = isset( $reset ) ? $reset : false;
-        if( $user )
-        {
-            //TODO make this work
-            $this->details[ 'messages' ] = message('EMAIL SENT TO : ' . $this->input->post( 'email' ), null, true);
-            return false;
-        }
-
-        $this->load->view('gui', $this->details);
+        $this->setView('reset');
+        $this->loadView('gui');
     }
 
     /**
@@ -74,45 +58,23 @@ class Auth extends CI_Controller {
     public function logout()
     {
         $this->session->destroy();
-
         $this->details['messages'] = message( 'Successfully Logged Out', null, true );
-
         redirect('auth');
     }
 
-    /**
-     * @return boolean
-     */
-    protected function authenticate()
+    protected function post( $reset = false )
     {
         if( $this->isNotValid( 'form' )) return false;
 
-        $this->load->model('user_model');
+        $post = $this->input->post( null, true );
+        if( ! $reset) $post = array_merge( $post, [ 'reset' => true ]);
 
-        $user = $this->user_model->authenticate(
-            $this->input->post( 'email' ),
-            $this->input->post( 'password' )
-        );
+        $this->load->library( 'user', $post );
+        $user = $this->user->data;
 
         if( $this->isNotValid( $user )) return false;
 
         return $user;
-    }
-
-    protected function resetPassword()
-    {
-        if( $this->isNotValid( 'form' )) return false;
-
-        $this->load->model('user_model');
-
-        $user = $this->user_model->exists(
-            [ 'auth_email' => $this->input->post( 'email' )],
-            true
-        );
-
-        if( $this->isNotValid( $user )) return false;
-
-        return true;
     }
 
     /**
@@ -123,7 +85,7 @@ class Auth extends CI_Controller {
     {
         while( empty( $this->details[ 'messages' ]) && ! is_null( $object )):
 
-            if( ! is_object( $object ) && ! empty( $object->messages )) $this->details['messages'] = $object->messages;
+            if( is_object( $object ) && ! empty( $object->messages )) $this->details['messages'] = $object->messages;
 
             if( $object == 'form')
             {
@@ -135,5 +97,26 @@ class Auth extends CI_Controller {
         endwhile;
 
         return true;
+    }
+
+    protected function hasPostData()
+    {
+        return $this->input->post( null, true ) !== false;
+    }
+
+    protected function setView( $content )
+    {
+        $this->details['view'] = $content;
+
+        return $this;
+    }
+
+    protected function loadView( $interface )
+    {
+        if( $this->hasPostData()) $this->user = $this->post( true );
+
+        if( isset( $this->user->valid ) && $this->user->valid ) return $this->index();
+
+        $this->load->view( $interface, $this->details );
     }
 }
