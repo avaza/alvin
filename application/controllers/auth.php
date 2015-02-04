@@ -27,9 +27,11 @@ class Auth extends CI_Controller {
     public function index()
     {
         //TODO session user must be false or object
-        if( ! $this->user ) $this->login();
+        if( ! $this->user ) return $this->login();
 
         redirect('home');
+
+        return false;
     }
 
     /**
@@ -118,5 +120,7 @@ class Auth extends CI_Controller {
         if( isset( $this->user->valid ) && $this->user->valid ) return $this->index();
 
         $this->load->view( $interface, $this->details );
+
+        return false;
     }
 }
