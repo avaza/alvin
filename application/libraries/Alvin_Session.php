@@ -7,36 +7,29 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  */
 class Alvin_Session extends CI_Session {
 
-    public $user;
+    public $valid;
 
     function __construct()
     {
         parent::__construct();
         $this->_ci =& get_instance();
-        $this->_ci->load->library('cudatel');
-        $this->user = false;
+        $this->valid = false;
     }
 
-    public function setUser($user)
+    public function setUser( $user )
     {
-        $this->user = $user;
-        $this->setCuda();
+        $this->set_userdata( compact( 'user' ));
+        if( $this->userdata( 'user' ) == $user ) return true;
 
-        return $this->user;
+        return false;
     }
 
-    public function setCuda()
+    public function setCuda( $cuda )
     {
-        $user = $this->_ci->cudatel->session('create');
+        $this->set_userdata( compact( 'cuda' ));
+        if( $this->userdata( 'user' ) == $cuda ) return true;
 
-        if( $user->valid )
-        {
-            $this->user = $user;
-
-            return $this->user;
-        }
-
-        return invalidWith( $this->user, 'Unable to authenticate in cudaTel System (See System Administrator)' );
+        return false;
     }
 
     /**

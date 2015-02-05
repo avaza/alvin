@@ -6,184 +6,142 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  */
 class Alvin_Model extends CI_Model {
 
-    /**
-     * @var string
-     */
-    private $crypt;
-
     protected $_ci;
-
     protected $table;
-
-    protected $compress;
 
     function __construct()
     {
         parent::__construct();
         $this->_ci =& get_instance();
-        $this->crypt = $this->config->item('encryption_key');
-
-    }
-
-    /**
-     * Encrypt the a string with the application's "encryption_key"
-     * @param string $string
-     *
-     * @return string - Encrypted string (40 chars)
-     */
-    protected function hash($string)
-    {
-        return sha1($string . $this->crypt);
+        $this->table = [];
     }
 
     /**
      * Checks if $this->table has been set within the child model before requesting CRUD operations
      *
-     * @return void;
-     */
-    protected function checkTable()
-    {
-        if ( ! isset($this->table)) die('You must set a "$this->table" value in the model before using CRUD functions');
-    }
-
-    /**
-     * Inserts an array into the model's database table
-     * @param array $params - (Array of values to be inserted into the table)
      *
-     * @return mixed
-     */
-    public function push($params)
-    {
-        $params = $this->adapt( 'compress', $params );
+     *    TODO     $params = $this->adaptMessage( $params );
 
-        switch($this->exists($params))
-        {
-            case true:
-                if($this->update($params))
-                {
-                    return (object) $params;
-                }
-                break;
-            case false:
-                if($this->create($params))
-                {
-                    return (object) $params;
-                }
-                break;
-        }
-
-        return false;
-    }
-    /**
-     * Returns a database record matching the given "where" criteria OR false
-     * No $params will return ALL records
-     * @param array $params - Associative array of "where" options [column => value, column2 => value2]
-     * @param integer $max - Maximum number of records to return
+           TODO  $params = $this->adaptResponse( $params );
      *
-     * @return mixed
+     * @return string
      */
-    public function pull($params = null, $max = 0)
+    protected function ready()
     {
-        $params = $this->adapt( 'decompress', $params );
+        if ( ! isset( $this->table['table'] )) die('NO CRUD - Requires structure array in the model ($table)');
 
-        $max = $max > 0 ? $max : null;
-        foreach($params as $column => $value)
-        {
-            $this->db->where($column, $value);
-        }
-        $query = $this->db->get($this->table, $max);
-        if( $query->result())
-        {
-            return $this->parseResult( $query->result());
-        }
-
-        return false;
+        return $this->table['table'];
     }
 
-    public function all()
+    public function find( $record = [], $max = 0 )
     {
-        return $this->pull();
-    }
+        if( ! is_array( $record )) $record = ['id' => $record ];
 
-    public function find( $id )
-    {
-        $find = ['id' => $id];
+        $limit = $max <= 0 ? null : [ 'limit' => $max ];
+        $find = array_merge( $record, $limit );
 
         return $this->pull( $find );
     }
 
-    /**
-     * Destroys a database record where "id" = params["id"]
-     * @param mixed $params
-     *
-     * @return boolean
-     */
-    public function wipe($params = null)
+    public function exists( $params = [], $return = false )
     {
-        $params = $this->adapt( 'compress', $params );
+        $record = $this->pull( $params );
 
-        if($this->exists($params))
-        {
-            $this->db->where('id', $params['id']);
-            $this->db->delete($this->table, $params);
-            if($this->db->affected_rows() > 0)
-            {
-                return true;
-            }
-        }
+        if( ! $record ) return false;
+        if( ! $return ) return true;
 
-        return false;
+        return $record;
     }
 
     /**
-     * Creates a NEW database record from $params
-     * @param array $params - (Array of values to be located)
-     * @param boolean $return - (return result yes/no)
-     * @return boolean
-     */
-    public function exists($params, $return = false)
-    {
-        $query = $this->pull($params);
-        if($query)
-        {
-            if( $return ) return $query;
-            return ( $query );
-        }
-
-        if(isset($params['id']))
-        {
-            $this->db->where('id', $params['id']);
-            $query = $this->db->get($this->table, 1);
-            return ($query->num_rows() > 0);
-        }
-
-        return false;
-    }
-
-    /**
-     * Creates a NEW database record from $params
+     * Inserts a database record matching the $params or updates the record matching the "id" param
      * @param array $params - (Array of values to be inserted into the table)
      *
-     * @return boolean
+     * @return mixed
      */
-    protected function create($params)
+    public function push( $params = [] )
     {
-        $this->db->insert($this->table, $params);
-        return $this->db->affected_rows() > 0;
+        $table = $this->ready();
+
+        if( $this->exists( $params )) return $this->edit( $params );
+
+        return $this->make( $params );
     }
 
     /**
-     * Updates an EXISTING database record from $params
-     * @param mixed $params
+     * Returns a database record matching the $params = [column => value, column2 => value2]
+     * @param array $params - assoc array
      *
-     * @return boolean
+     * @return mixed
      */
-    protected function update($params)
+    public function pull( $params = [] )
     {
-        $this->db->where('id', $params['id']);
-        $this->db->update($this->table, $params);
-        return $this->db->affected_rows() > 0;
+        $table = $this->ready();
+        $search = $this->adaptMessage( $params );
+
+        foreach( $search as $column => $value ):
+            $this->db->where( $column, $value );
+        endforeach;
+
+        $query = $this->db->get( $table, $params[ 'limit' ]);
+        if( ! $query->result()) return false;
+
+        return $this->adaptResponse( $query->result());
     }
+
+    public function wipe( $record )
+    {
+        $table = $this->ready();
+        $delete = $this->adaptMessage( $record );
+
+        if( $this->exists( $record ))
+        {
+            $this->db->where( 'id', $delete[ 'id' ]);
+            $this->db->delete( $table, $delete );
+
+            if( $this->db->affected_rows() <= 0 ) return false;
+        }
+
+        return true;
+    }
+
+    private function make( $record )
+    {
+        $table = $this->ready();
+        $insert = $this->adaptMessage( $record );
+
+        $this->db->insert($table, $insert);
+
+        if( $this->db->affected_rows() <= 0 ) return false;
+
+        return $record;
+    }
+
+    private function edit( $record )
+    {
+        $table = $this->ready();
+        $update = $this->adaptMessage( $record );
+
+        $this->db->where( 'id', $update[ 'id' ]);
+        $this->db->update( $table, $update );
+
+        if( $this->db->affected_rows() <= 0 ) return false;
+
+        return $record;
+    }
+
+
+/*      $this->table = [
+                 'table' => 'users',
+                    'id' => [ 'input' => 'user_id' ],
+            'auth_email' => [ 'input' => 'email' ],
+            'auth_passw' => [ 'input' => 'password' ],
+            'auth_atmpt' => [ 'input' => 'count' ],
+            'auth_block' => [ 'input' => 'key' ],
+            'auth_creds' => [ 'press' => [ 'ext', 'pin' ]],
+            'auth_level' => [ 'press' => [ 'roles', 'permissions' ]]
+        ];*/
+
 
     protected function adapt( $action = 'compress', $object )
     {

@@ -1,73 +1,69 @@
-<?php if( ! defined( 'BASEPATH' )) exit( 'No direct script access allowed' );
+<?php
+if( ! defined( 'BASEPATH' )) exit( 'No direct script access allowed' );
 
-class User extends Service{
+class User {
 
-    function __construct( $params = null )
+    public $data;
+    protected $_ci;
+
+    function __construct( $posted = [])
     {
+        $this->_ci =& get_instance();
+        $this->_ci->load->library( 'morph' );
         $this->_ci->load->model( 'user_model' );
 
-        $default = [ 'email' => null, 'password' => null, 'reset' => false ];
+        $this->data = null;
 
-        if( ! is_null( $params )) $params = array_merge( $default, $params );
+        if( empty( $posted )) die( 'You must POST data to create a User Instance' );
 
-        $this->set( $params );
+        $this->setup( $posted );
     }
 
-    protected function set( $user )
+    protected function setup( $post )
     {
-        if( $user[ 'reset' ]) return $this->reset( $user );
+        if( ! method_exists( $this, $post[ 'view' ])) die( 'Not a valid POST URI' );
 
-        $user = $this->login( $user );
-
-        while( is_null( $user )):
-            $user = $this->session();
-            die( 'Invalid USER : >' . json_encode( $user ) . '<');
-        endwhile;
-
-        $this->data = $user;
-
-        return $this;
+        return call_user_func_array([ $this, $post[ 'view' ]], [ $post ] );
     }
 
-    protected function reset( $user )
+    protected function login( $posted )
     {
-        //TODO actually send reset email
-        return message( 'A reset link has been sent to ' . $user[ 'email' ], null, true );
-    }
+        $match = [ 'email' => null, 'password' => null ];
+        $login = array_intersect_key( $posted, $match );
+        $this->data = $this->check( $login );
 
-    protected function login( $user )
-    {
-        if( ! is_array( $user )) return null;
-
-        $login = [ 'email' => null, 'password' => null ];
-
-        if( array_keys( $user ) == array_keys( $login )) return $this->getIfValid( $user );
-
-        return null;
-    }
-
-    protected function session( $user = null )
-    {
-        if( ! is_null( $user )) $this->_ci->session->user = $user;
-
-        if( ! isset( $this->_ci->session->user )) return null;
-
-        return $this->_ci->session->user;
-    }
-
-    protected function getIfValid( $record )
-    {
-        $user = $this->getIfExists( $record, [ 'user_model' ], [ 'password' ]);
-
-        if( ! $user && isset( $record[ 'email' ]))
-        {
-            $this->attempted( $record[ 'email' ]);
-            return message( 'Invalid Username and/or Password.' );
-        }
+        if( ! $this->data ) return message( 'Invalid Username and/or Password.' );
 
         if( $this->isBlocked()) return message( 'Account Blocked ( Too many failed attempts )' );
 
-        return $user;
+        return $this->session();
+    }
+
+    protected function reset( $posted )
+    {
+        //TODO actually send reset email
+        return message( 'A reset link has been sent to ' . $posted[ 'email' ], true );
+    }
+
+    protected function logout( $posted )
+    {
+        $this->_ci->session->valid = false;
+
+        if( ! $posted[ 'refresh' ]) $this->_ci->session->destroy();
+
+        return message( 'Successfully Logged Out', true);
+    }
+
+    /**
+     * @param $login
+     * @return mixed
+     */
+    private function check( $login )
+    {
+        $login[ 'password' ] = $this->_ci->morph->hash( $login[ 'password' ]);
+        $this->attempted( $login[ 'email' ]);
+
+        return $this->_ci->user_model->exists( $login, true );
     }
 
     protected function attempted( $auth_email )
@@ -90,6 +86,23 @@ class User extends Service{
         if( isset( $this->data->auth_block )) return $this->data->auth_block == 1 ? true : false;
 
         return true;
+    }
+
+    public function session()
+    {
+        if( is_null( $this->data )) return false;
+
+        if( ! $this->_ci->session->valid ) return $this->set();
+
+        return $this->_ci->session->userdata( 'user');
+    }
+
+    private function set()
+    {
+        $this->_ci->session->set_userdata( 'user', $this->data );
+        $this->_ci->session->valid = true;
+
+        return $this->_ci->session->userdata( 'user');
     }
 
     protected function is( $role )// CHECK ROLE
@@ -121,8 +134,4 @@ class User extends Service{
     {
 
     }
-
-
-
-
 }

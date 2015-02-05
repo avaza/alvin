@@ -23,14 +23,17 @@ function printMessages( $messages = null )
 }
 
 /**
- * @param null  $message
- * @param array $object
- * @param bool  $valid
- * @param array $markup
+ * @param null  $message - Message string to display
+ * @param bool  $valid - Boolean value for message type ( true = success, false= failure )
+ * @param array $object - Object to attach message to
+ * @param array $markup - Custom markup options
+ *
  * @return array|object
- */
-function message( $message = null, $object = [], $valid = false, $markup = [] )
+ */ // TODO $valid should be the class name
+function message( $message = null, $valid = false, $object = [], $markup = [] )
 {
+
+    //TODO add additional option to send the message class
     $type = $valid ? 'valid' : 'invalid';
 
     if( is_null( $message )) die( 'Please include a message when calling message()' );

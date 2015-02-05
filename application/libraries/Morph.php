@@ -1,17 +1,15 @@
 <?php 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Crypt_model extends CI_Model {
+class Morph{
 
     private $crypt;
     protected $_ci;
 
     function __construct()
     {
-        parent::__construct();
         $this->_ci =& get_instance();
-        $this->crypt = $this->config->item('encryption_key');
-
+        $this->crypt = $this->_ci->config->item('encryption_key');
     }
 
     /**
@@ -20,10 +18,8 @@ class Crypt_model extends CI_Model {
      *
      * @return string - Encrypted string (40 chars)
      */
-    protected function hash( $string )
+    public function hash( $string )
     {
         return sha1( $string . $this->crypt );
     }
 }
-    
-    
