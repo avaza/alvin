@@ -17,7 +17,7 @@ class Alvin_Loader extends CI_Loader {
     function __construct()
     {
         parent::__construct();
-        $this->jsonLoaders = ['gui', 'api'];
+        $this->jsonLoaders = [ 'gui', 'api' ];
     }
 
     /**

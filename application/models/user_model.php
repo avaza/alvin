@@ -8,18 +8,11 @@ class User_model extends Alvin_Model {
         parent::__construct();
         $this->_ci =& get_instance();
 
-        $this->table = [
-                 'table' => 'users',
-                    'id' => [ 'input' => 'user_id' ],
-            'auth_email' => [ 'input' => 'email' ],
-            'auth_passw' => [ 'input' => 'password' ],
-            'auth_atmpt' => [ 'input' => 'count' ],
-            'auth_block' => [ 'input' => 'key' ],
-            'auth_creds' => [ 'press' => [ 'ext', 'pin' ]],
-            'auth_level' => [ 'press' => [ 'roles', 'permissions' ]]
-        ];
+        $this->table = 'users';
     }
 
+
+    //TODO repair these functions AFTER making new user
     protected function roles()
     {
         return array_shift( array_keys( $this->collection( 'access' )));

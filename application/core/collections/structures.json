@@ -1,0 +1,15 @@
+{
+    "users": {
+        "input": {
+            "id": "user_id",
+            "auth_email": "email",
+            "auth_passw": "password",
+            "auth_atmpt": "attempts",
+            "auth_block": "blocked"
+        },
+        "press": {
+            "auth_creds": [ "ext", "pin" ],
+            "auth_level": [ "roles", "permissions" ]
+        }
+    }
+}

@@ -15,11 +15,17 @@ class Alvin_Controller extends CI_Controller {
         parent::__construct();
     }
 
+    /**
+     * @return bool
+     */
     public function index()
     {
         return false;
     }
 
+    /**
+     * @return bool
+     */
     protected function post()
     {
         if( $this->inputInvalid()) redirect('back');
@@ -34,6 +40,7 @@ class Alvin_Controller extends CI_Controller {
 
     /**
      * @param mixed $object
+     *
      * @return bool
      */
     protected function inputInvalid( $object = 'form' )
@@ -49,6 +56,9 @@ class Alvin_Controller extends CI_Controller {
         return true;
     }
 
+    /**
+     * @return $this
+     */
     protected function validate()
     {
         $this->load->library('form_validation');
@@ -57,6 +67,11 @@ class Alvin_Controller extends CI_Controller {
         return $this;
     }
 
+    /**
+     * @param array $messages
+     *
+     * @return $this
+     */
     protected function setMessages( $messages = [] )
     {
         if( ! empty( $messages )) $this->content[ 'messages' ] = $messages;
@@ -64,6 +79,11 @@ class Alvin_Controller extends CI_Controller {
         return $this;
     }
 
+    /**
+     * @param string $content
+     *
+     * @return $this
+     */
     protected function setView( $content = 'index' )
     {
         $this->content[ 'view' ] = $content;
@@ -71,6 +91,11 @@ class Alvin_Controller extends CI_Controller {
         return $this;
     }
 
+    /**
+     * @param string $library
+     *
+     * @return $this
+     */
     protected function setLibrary( $library = 'user' )
     {
         $this->content[ 'library' ] = $library;
@@ -78,6 +103,11 @@ class Alvin_Controller extends CI_Controller {
         return $this;
     }
 
+    /**
+     * @param $interface
+     *
+     * @return bool
+     */
     protected function getView( $interface )
     {
         if( ! empty( $this->input->post( null, true ))) $this->post();
@@ -87,6 +117,9 @@ class Alvin_Controller extends CI_Controller {
         return false;
     }
 
+    /**
+     * @return array
+     */
     protected function posted()
     {
         $input = $this->input->post( null, true );
@@ -96,6 +129,11 @@ class Alvin_Controller extends CI_Controller {
         return array_merge( $input, $this->content );
     }
 
+    /**
+     * @param $object
+     *
+     * @return object
+     */
     protected function forceObject( $object )
     {
         if( ! is_object( $object ) && is_array( $object )) $object = (object) $object;
@@ -105,6 +143,11 @@ class Alvin_Controller extends CI_Controller {
         return $object;
     }
 
+    /**
+     * @param $object
+     *
+     * @return array
+     */
     protected function forceArray( $object )
     {
         if( ! is_array( $object ) && is_object( $object )) $object = (array) $object;

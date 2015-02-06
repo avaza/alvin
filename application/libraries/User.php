@@ -19,6 +19,11 @@ class User {
         $this->setup( $posted );
     }
 
+    /**
+     * @param $post
+     *
+     * @return mixed
+     */
     protected function setup( $post )
     {
         if( ! method_exists( $this, $post[ 'view' ])) die( 'Not a valid POST URI' );
@@ -26,6 +31,11 @@ class User {
         return call_user_func_array([ $this, $post[ 'view' ]], [ $post ] );
     }
 
+    /**
+     * @param $posted
+     *
+     * @return array|bool|object
+     */
     protected function login( $posted )
     {
         $match = [ 'email' => null, 'password' => null ];
@@ -39,12 +49,22 @@ class User {
         return $this->session();
     }
 
+    /**
+     * @param $posted
+     *
+     * @return array|object
+     */
     protected function reset( $posted )
     {
         //TODO actually send reset email
         return message( 'A reset link has been sent to ' . $posted[ 'email' ], true );
     }
 
+    /**
+     * @param $posted
+     *
+     * @return array|object
+     */
     protected function logout( $posted )
     {
         $this->_ci->session->valid = false;
@@ -56,6 +76,7 @@ class User {
 
     /**
      * @param $login
+     *
      * @return mixed
      */
     private function check( $login )
@@ -66,28 +87,39 @@ class User {
         return $this->_ci->user_model->exists( $login, true );
     }
 
-    protected function attempted( $auth_email )
+    /**
+     * @param $email
+     *
+     * @return $this
+     */
+    protected function attempted( $email )
     {
-        $record = compact( 'auth_email' );
+        $record = compact( 'email' );
         $user = $this->_ci->user_model->exists( $record, true );
 
         if( ! $user ) return $this;
 
-        $user->auth_atmpt = $user->auth_atmpt + 1;
-        $user->auth_block = $user->auth_atmpt >= 10 ? 1 : 0;
+        $user->attempts = $user->attempts + 1;
+        $user->blocked = $user->attempts >= 10 ? 1 : 0;
 
         $this->data = $this->_ci->user_model->push( $user );
 
         return $this;
     }
 
+    /**
+     * @return bool
+     */
     protected function isBlocked()
     {
-        if( isset( $this->data->auth_block )) return $this->data->auth_block == 1 ? true : false;
+        if( isset( $this->data->blocked )) return $this->data->blocked == 1 ? true : false;
 
         return true;
     }
 
+    /**
+     * @return bool
+     */
     public function session()
     {
         if( is_null( $this->data )) return false;
@@ -97,6 +129,9 @@ class User {
         return $this->_ci->session->userdata( 'user');
     }
 
+    /**
+     * @return mixed
+     */
     private function set()
     {
         $this->_ci->session->set_userdata( 'user', $this->data );
@@ -105,31 +140,52 @@ class User {
         return $this->_ci->session->userdata( 'user');
     }
 
+    /**
+     * @param $role
+     */
     protected function is( $role )// CHECK ROLE
     {
 
     }
 
+    /**
+     * @param $role
+     */
     protected function isNow( $role )// ADD ROLE
     {
 
     }
 
+    /**
+     * @param $role
+     */
     protected function isNot( $role )// REMOVE ROLE
     {
 
     }
 
+    /**
+     * @param $action
+     * @param $resource
+     */
     protected function can( $action, $resource )// CHECK PERMISSIONS
     {
 
     }
 
+    /**
+     * @param $action
+     * @param $resource
+     */
     protected function canNow( $action, $resource )// ADD PERMISSION
     {
 
     }
 
+    /**
+     * @param $action
+     * @param $resource
+     */
     protected function canNot( $action, $resource )// REMOVE PERMISSION
     {
 
