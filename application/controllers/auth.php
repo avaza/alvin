@@ -4,10 +4,10 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 /**
  * Class Auth
  *
- * @property Alvin_Session $session
+ * @property ARC_Session $session
  * @property User $user
  */
-class Auth extends Alvin_Controller {
+class Auth extends ARC_Controller {
 
     protected $content;
 

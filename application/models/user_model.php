@@ -1,7 +1,7 @@
 <?php
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class User_model extends Alvin_Model {
+class User_model extends ARC_Model {
 
     function __construct()
     {

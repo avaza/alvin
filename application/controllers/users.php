@@ -1,7 +1,7 @@
 <?php
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Users extends Alvin_Controller {
+class Users extends ARC_Controller {
      
     function __construct()
     {
