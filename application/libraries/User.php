@@ -6,29 +6,27 @@ class User {
     public $data;
     protected $_ci;
 
-    function __construct( $posted = [])
+    function __construct()
     {
         $this->_ci =& get_instance();
         $this->_ci->load->library( 'morph' );
         $this->_ci->load->model( 'user_model' );
 
         $this->data = null;
-
-        if( empty( $posted )) die( 'You must POST data to create a User Instance' );
-
-        $this->setup( $posted );
     }
 
     /**
-     * @param $post
+     * @param $sent
      *
      * @return mixed
      */
-    protected function setup( $post )
+    public function post( $sent )
     {
-        if( ! method_exists( $this, $post[ 'view' ])) die( 'Not a valid POST URI' );
+        if( ! method_exists( $this, $sent[ 'view' ])) die( 'Not a valid POST URI' );
 
-        return call_user_func_array([ $this, $post[ 'view' ]], [ $post ] );
+        $this->data = call_user_func_array([ $this, $sent[ 'view' ]], [ $sent ] );
+
+        return $this;
     }
 
     /**
@@ -40,11 +38,11 @@ class User {
     {
         $match = [ 'email' => null, 'password' => null ];
         $login = array_intersect_key( $posted, $match );
-        $this->data = $this->check( $login );
+        $data = $this->check( $login );
 
-        if( ! $this->data ) return message( 'Invalid Username and/or Password.' );
+        if( ! $data ) return message( 'Invalid Username and/or Password.' );
 
-        if( $this->isBlocked()) return message( 'Account Blocked ( Too many failed attempts )' );
+        if( $this->isBlocked( $data )) return message( 'Account Blocked ( Too many failed attempts )' );
 
         return $this->session();
     }
@@ -108,21 +106,27 @@ class User {
     }
 
     /**
+     * @param $data
+     *
      * @return bool
      */
-    protected function isBlocked()
+    protected function isBlocked( $data )
     {
-        if( isset( $this->data->blocked )) return $this->data->blocked == 1 ? true : false;
+        if( isset( $data->blocked )) return $data->blocked == 1 ? true : false;
 
         return true;
     }
 
     /**
+     * @param $data
+     *
      * @return bool
      */
-    public function session()
+    public function session( $data = false )
     {
-        if( is_null( $this->data )) return false;
+        if( ! $data ) return false;
+
+        $this->data = $data;
 
         if( ! $this->_ci->session->valid ) return $this->set();
 

@@ -15,9 +15,16 @@ class Auth extends Alvin_Controller {
     {
         parent::__construct();
 
+        $this->sources = [
+            'post' => [
+                'type' => 'library',
+                'name' => 'user'
+            ]
+        ];
+
         $this->content = [
             'view' => 'index',
-            'library' => 'user',
+            'data' => null,
             'messages' => []
         ];
 
@@ -39,36 +46,42 @@ class Auth extends Alvin_Controller {
     /**
      * URI - POST Location for system login
      *
+     * @param $post
+     *
      * @return mixed
      */
-    public function login()
+    public function login( $post = true )
     {
         $this->setView( 'login' );
 
-        return $this->getView( 'gui' );
+        return $this->getView( 'gui', $post );
     }
 
     /**
      * URI - POST Location for password reset
      *
+     * @param $post
+     *
      * @return mixed
      */
-    public function reset()
+    public function reset( $post = true )
     {
         $this->setView( 'reset' );
 
-        return $this->getView( 'gui' );
+        return $this->getView( 'gui', $post  );
     }
 
     /**
      * URI - Location for logout redirect
      *
+     * @param $post
+     *
      * @return mixed
      */
-    public function logout()
+    public function logout( $post = true )
     {
         $this->setView( 'login' );
 
-        return $this->getView( 'gui' );
+        return $this->getView( 'gui', $post  );
     }
 }

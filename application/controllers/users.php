@@ -7,45 +7,36 @@ class Users extends Alvin_Controller {
     {
         parent::__construct();
         $this->load->model( 'user_model' );
+
+        $this->content = [
+            'view' => 'index',
+            'library' => 'user',
+            'messages' => []
+        ];
     }
 
-    public function index()
+    public function index( $post = false )
     {
-        $this->details[ 'view' ] = 'users-index';
-        $this->details[ 'data' ] = $this->user_model->all();
+        $this->setView( 'users-index' );
+        $this->setData( $this->user_model->find());
 
-        $this->load->view( 'gui', $this->details );
+        $this->getView( 'gui', $post );
     }
 
-    public function create()
-        {
-            if( $this->wasPosted()) $this->post();
-
-            $this->details[ 'view' ] = 'users-create';
-
-            $this->load->view( 'gui', $this->details );
-        }
-
-        public function edit( $id )
-        {
-            if( $this->wasPosted()) $this->post();
-
-            $this->details[ 'view' ] = 'users-edit';
-            $this->details[ 'data' ] = $this->user_model->find( $id );
-
-            $this->load->view( 'gui', $this->details );
-        }
-
-    protected function post()
+    public function create( $post = false )
     {
-        if( $this->isNotValid( 'form' )) return false;
+        $this->setView( 'users-create' );
+        $this->setData( $this->user_model->find());
 
-        $user = $this->user_model->parseInput( $this->input->post( null, true));
-        $user = $this->user_model->push( $user );
+        $this->getView( 'gui', $post );
+    }
 
-        if( $this->isNotValid( $user )) return false;
+    public function update( $post = false )
+    {
+        $this->setView( 'users-update' );
+        $this->setData( $this->user_model->find());
 
-        return $user;
+        $this->getView( 'gui', $post );
     }
 
     /**

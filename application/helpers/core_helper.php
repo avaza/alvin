@@ -1,14 +1,5 @@
 <?php
-
-
-//TODO determine if you need these\/
-/**
- * Parses database query results with the provided options
- * @param mixed $result
- * @param array $options
- *
- * @return mixed
- */
+/*
 protected function parseResult($result, $options = [])
 {
     $default = [ 'raw' => false, 'as' => 'object', 'custom' => [] ];
@@ -68,4 +59,44 @@ public function parseInput()
     endforeach;
 
     return $parsed;
+}
+*/
+function redirectBack()
+{
+    redirect( $_SERVER[ 'HTTP_REFERER' ]);
+}
+
+
+/**
+ * Will always return as $type or false
+ * @param string $data - Data to be cast
+ * @param string $type - Type to cast $data to
+ *
+ * @return mixed
+ */
+function cast( $data, $type = 'object')
+{
+    switch( $type )
+    {
+        case 'object':
+            if( is_object( $data )) return $data;
+            if( is_array( $data )) return (object) $data;
+            if( is_string( $data )) return (object) compact( 'data' );
+            return false;
+
+            break;
+        case 'array':
+            if( is_array( $data )) return $data;
+            if( is_object( $data )) return (array) $data;
+            if( is_string( $data )) return compact( 'data' );
+            return false;
+
+            break;
+        case 'json':
+            if( is_object( $data ) || is_array( $data )) return json_encode( $data );
+            if( is_string( $data ) && is_array( json_decode( $data, true ))) return $data;
+            return false;
+
+            break;
+    }
 }

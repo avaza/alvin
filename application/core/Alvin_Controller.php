@@ -5,10 +5,12 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  * Class Alvin_Controller
  *
  * @property Alvin_Session $session
+ * @property User $resource
  */
 class Alvin_Controller extends CI_Controller {
 
     protected $content;
+    protected $sources;
 
     function __construct()
     {
@@ -28,32 +30,15 @@ class Alvin_Controller extends CI_Controller {
      */
     protected function post()
     {
-        if( $this->inputInvalid()) redirect('back');
-
-        $library = $this->content[ 'library' ];
-
-        $this->load->library( $library, $this->posted());
-        if( $this->inputInvalid( $this->$library->data )) redirect('back');
-
-        return $this->index();//TODO User Class must set session validity to true
-    }
-
-    /**
-     * @param mixed $object
-     *
-     * @return bool
-     */
-    protected function inputInvalid( $object = 'form' )
-    {
         while( empty( $this->content[ 'messages' ])):
-            if( $object == 'form') $this->validate();
-            if( ! is_object( $object )) $object = $this->forceObject( $object );
-            if( ! empty( $object->messages )) $this->setMessages( $object->messages );
+            $this->validate();
+            $response = $this->send();
+            $this->confirm( $response );
 
-            return false;
+            return $this->index();//TODO User Class must set session validity to true
         endwhile;
 
-        return true;
+        return $this->invalidResponse();
     }
 
     /**
@@ -65,6 +50,56 @@ class Alvin_Controller extends CI_Controller {
         if( ! $this->form_validation->run()) $this->setMessages( validationMessages());
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function send()
+    {
+
+        $post = $this->sources[ 'post' ];
+        $this->loadSource( $post[ 'type' ], $post[ 'name' ] );
+
+        return cast( $this->resource->post( $this->posted()));
+    }
+
+    protected function loadSource( $type, $name )
+    {
+        $this->load->$type( $name, [], 'resource' );
+
+        return $this;
+    }
+
+    /**
+     * @param $object
+     * @return $this
+     */
+    protected function confirm( $object )
+    {
+        if( isset( $object->messages ) && ! empty( $object->messages )) $this->setMessages( $object->messages );
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function invalidResponse()
+    {
+        return call_user_func_array( [ $this, $this->content[ 'view' ] ], [ false ]);
+    }
+
+    /**
+     * @return array
+     */
+    protected function posted()
+    {
+        $input = $this->input->post( null, true );
+
+        if( ! $input ) return $this->content;
+
+        return array_merge( $input, $this->content );
     }
 
     /**
@@ -91,6 +126,13 @@ class Alvin_Controller extends CI_Controller {
         return $this;
     }
 
+    protected function setData( $data )
+    {
+        $this->content['data'] = $data;
+
+        return $this;
+    }
+
     /**
      * @param string $library
      *
@@ -105,55 +147,16 @@ class Alvin_Controller extends CI_Controller {
 
     /**
      * @param $interface
+     * @param $post
      *
      * @return bool
      */
-    protected function getView( $interface )
+    protected function getView( $interface, $post )
     {
-        if( ! empty( $this->input->post( null, true ))) $this->post();
+        if( $post && ! empty( $this->input->post( null, true ))) return $this->post();
 
         $this->load->view( $interface, $this->content );
 
-        return false;
-    }
-
-    /**
-     * @return array
-     */
-    protected function posted()
-    {
-        $input = $this->input->post( null, true );
-
-        if( ! $input ) return $this->content;
-
-        return array_merge( $input, $this->content );
-    }
-
-    /**
-     * @param $object
-     *
-     * @return object
-     */
-    protected function forceObject( $object )
-    {
-        if( ! is_object( $object ) && is_array( $object )) $object = (object) $object;
-
-        if( ! is_object( $object )) $this->setMessages( message( 'Invalid Parameters - Cannot make Object' ));
-
-        return $object;
-    }
-
-    /**
-     * @param $object
-     *
-     * @return array
-     */
-    protected function forceArray( $object )
-    {
-        if( ! is_array( $object ) && is_object( $object )) $object = (array) $object;
-
-        if( ! is_array( $object )) $this->setMessages( message( 'Invalid Parameters - Cannot make Array' ));
-
-        return $object;
+        return $this;
     }
 }

@@ -42,7 +42,7 @@ class Alvin_Model extends CI_Model {
     {
         if ( ! isset( $this->table )) die('NO CRUD - Requires defined ( $table )');
 
-        $this->structure = $this->collection( 'structure' )[$this->table];
+        $this->structure = $this->collection( 'structures' )[$this->table];
 
         return $this->table;
     }
@@ -98,9 +98,12 @@ class Alvin_Model extends CI_Model {
      */
     public function pull( $params = [] )
     {
+        $table = $this->ready();
+        $limit = isset( $params[ 'limit' ]) ? $params[ 'limit' ] : null;
+
         $search = $this->adaptMessage( $params );
 
-        $response = $this->read( $search, $params[ 'limit' ]);
+        $response = $this->read( $table, $search, $limit );
 
         return $this->adaptResponse( $response );
     }
@@ -125,10 +128,8 @@ class Alvin_Model extends CI_Model {
      *
      * @return mixed
      */
-    private function read( $search, $limit )
+    private function read( $table, $search, $limit )
     {
-        $table = $this->ready();
-
         foreach( $search as $column => $value ):
             $this->db->where( $column, $value );
         endforeach;
@@ -251,6 +252,8 @@ class Alvin_Model extends CI_Model {
 
         if( $read ) $names = array_flip( $this->structure[ 'input' ]);
 
+
+
         foreach( $names as $to => $from ):
             if( isset( $message[ $from ])) $adapted[ $to ] = $message[ $from ];
         endforeach;
@@ -321,6 +324,7 @@ class Alvin_Model extends CI_Model {
 
         return array_merge( $adapted, $unpressed );
     }
+
 }
     
     
